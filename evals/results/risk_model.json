@@ -1,0 +1,58 @@
+{
+  "target": "chronic metabolic/cardiovascular condition (diabetes, hypertension, prediabetes or metabolic syndrome)",
+  "n_train_period1": 1803,
+  "n_test_period2": 2275,
+  "positive_rate_period1": 0.43926788685524126,
+  "positive_rate_period2": 0.4501098901098901,
+  "models": {
+    "Decision Tree": {
+      "validation_period1": {
+        "accuracy": 0.7922437673130194,
+        "precision": 0.71875,
+        "recall": 0.8679245283018868,
+        "f1": 0.7863247863247863,
+        "roc_auc": 0.8661809577184133
+      },
+      "test_period2": {
+        "accuracy": 0.8039560439560439,
+        "precision": 0.7636861313868614,
+        "recall": 0.8173828125,
+        "f1": 0.789622641509434,
+        "roc_auc": 0.903349585956235
+      }
+    },
+    "SVM": {
+      "validation_period1": {
+        "accuracy": 0.7867036011080333,
+        "precision": 0.7135416666666666,
+        "recall": 0.8616352201257862,
+        "f1": 0.7806267806267806,
+        "roc_auc": 0.8576499159349897
+      },
+      "test_period2": {
+        "accuracy": 0.781978021978022,
+        "precision": 0.691027496382055,
+        "recall": 0.9326171875,
+        "f1": 0.7938487115544473,
+        "roc_auc": 0.8693287557454037
+      }
+    },
+    "Neural Network": {
+      "validation_period1": {
+        "accuracy": 0.7590027700831025,
+        "precision": 0.6914893617021277,
+        "recall": 0.8176100628930818,
+        "f1": 0.7492795389048992,
+        "roc_auc": 0.8473441683791021
+      },
+      "test_period2": {
+        "accuracy": 0.7476923076923077,
+        "precision": 0.6686656671664168,
+        "recall": 0.87109375,
+        "f1": 0.7565733672603902,
+        "roc_auc": 0.8406509167665868
+      }
+    }
+  },
+  "selected_model": "Decision Tree"
+}

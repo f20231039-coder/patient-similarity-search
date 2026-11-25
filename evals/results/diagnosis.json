@@ -1,0 +1,276 @@
+{
+  "mean_relevant_per_query": 639.24,
+  "ndcg_if_all10_share_one_condition": 0.4510069682841815,
+  "candidate_pool_size": "hybrid top-50 union",
+  "share_of_relevant_reaching_pool": 0.09796796838773307,
+  "perfect_reranker_ndcg_from_pool": 0.7977443011028824,
+  "current_final_ndcg": 0.4579673261915218,
+  "per_condition": [
+    {
+      "condition": "Non-small cell carcinoma of lung  TNM stage 1",
+      "hit_rate_top10": 0.263,
+      "prevalence": 0.007,
+      "lift": 35.13,
+      "queries": 8
+    },
+    {
+      "condition": "Non-small cell lung cancer",
+      "hit_rate_top10": 0.263,
+      "prevalence": 0.007,
+      "lift": 35.13,
+      "queries": 8
+    },
+    {
+      "condition": "Hyperglycemia",
+      "hit_rate_top10": 0.771,
+      "prevalence": 0.031,
+      "lift": 24.72,
+      "queries": 7
+    },
+    {
+      "condition": "End-stage renal disease",
+      "hit_rate_top10": 0.4,
+      "prevalence": 0.018,
+      "lift": 22.75,
+      "queries": 5
+    },
+    {
+      "condition": "Neuropathy due to type 2 diabetes mellitus",
+      "hit_rate_top10": 0.52,
+      "prevalence": 0.024,
+      "lift": 21.51,
+      "queries": 5
+    },
+    {
+      "condition": "Chronic kidney disease stage 3",
+      "hit_rate_top10": 0.838,
+      "prevalence": 0.044,
+      "lift": 19.27,
+      "queries": 13
+    },
+    {
+      "condition": "Chronic kidney disease stage 4",
+      "hit_rate_top10": 0.588,
+      "prevalence": 0.032,
+      "lift": 18.56,
+      "queries": 8
+    },
+    {
+      "condition": "Chronic congestive heart failure",
+      "hit_rate_top10": 0.482,
+      "prevalence": 0.027,
+      "lift": 17.97,
+      "queries": 11
+    },
+    {
+      "condition": "Hypertriglyceridemia",
+      "hit_rate_top10": 0.994,
+      "prevalence": 0.069,
+      "lift": 14.5,
+      "queries": 18
+    },
+    {
+      "condition": "Dependent drug abuse",
+      "hit_rate_top10": 0.627,
+      "prevalence": 0.045,
+      "lift": 13.99,
+      "queries": 11
+    },
+    {
+      "condition": "Diabetes mellitus type 2",
+      "hit_rate_top10": 0.994,
+      "prevalence": 0.071,
+      "lift": 13.97,
+      "queries": 18
+    },
+    {
+      "condition": "Chronic kidney disease stage 2",
+      "hit_rate_top10": 0.926,
+      "prevalence": 0.066,
+      "lift": 13.95,
+      "queries": 23
+    },
+    {
+      "condition": "Chronic kidney disease stage 1",
+      "hit_rate_top10": 0.916,
+      "prevalence": 0.076,
+      "lift": 12.05,
+      "queries": 25
+    },
+    {
+      "condition": "Chronic intractable migraine without aura",
+      "hit_rate_top10": 0.49,
+      "prevalence": 0.042,
+      "lift": 11.61,
+      "queries": 10
+    },
+    {
+      "condition": "Disorder of kidney due to diabetes mellitus",
+      "hit_rate_top10": 0.93,
+      "prevalence": 0.084,
+      "lift": 11.13,
+      "queries": 27
+    },
+    {
+      "condition": "Atopic dermatitis",
+      "hit_rate_top10": 0.21,
+      "prevalence": 0.019,
+      "lift": 11.11,
+      "queries": 10
+    },
+    {
+      "condition": "Alzheimer's disease",
+      "hit_rate_top10": 0.2,
+      "prevalence": 0.028,
+      "lift": 7.22,
+      "queries": 7
+    },
+    {
+      "condition": "Myocardial infarction",
+      "hit_rate_top10": 0.26,
+      "prevalence": 0.038,
+      "lift": 6.8,
+      "queries": 10
+    },
+    {
+      "condition": "Hyperlipidemia",
+      "hit_rate_top10": 0.678,
+      "prevalence": 0.1,
+      "lift": 6.76,
+      "queries": 36
+    },
+    {
+      "condition": "Child attention deficit disorder",
+      "hit_rate_top10": 0.12,
+      "prevalence": 0.019,
+      "lift": 6.35,
+      "queries": 5
+    },
+    {
+      "condition": "Epilepsy",
+      "hit_rate_top10": 0.15,
+      "prevalence": 0.024,
+      "lift": 6.2,
+      "queries": 8
+    },
+    {
+      "condition": "Metabolic syndrome X",
+      "hit_rate_top10": 0.795,
+      "prevalence": 0.141,
+      "lift": 5.65,
+      "queries": 38
+    },
+    {
+      "condition": "Seizure disorder",
+      "hit_rate_top10": 0.2,
+      "prevalence": 0.037,
+      "lift": 5.42,
+      "queries": 13
+    },
+    {
+      "condition": "Ischemic heart disease",
+      "hit_rate_top10": 0.789,
+      "prevalence": 0.161,
+      "lift": 4.89,
+      "queries": 37
+    },
+    {
+      "condition": "Osteoporosis",
+      "hit_rate_top10": 0.2,
+      "prevalence": 0.043,
+      "lift": 4.64,
+      "queries": 10
+    },
+    {
+      "condition": "Childhood asthma",
+      "hit_rate_top10": 0.167,
+      "prevalence": 0.051,
+      "lift": 3.3,
+      "queries": 21
+    },
+    {
+      "condition": "Sleep disorder",
+      "hit_rate_top10": 0.129,
+      "prevalence": 0.039,
+      "lift": 3.29,
+      "queries": 7
+    },
+    {
+      "condition": "Polyp of colon",
+      "hit_rate_top10": 0.23,
+      "prevalence": 0.071,
+      "lift": 3.26,
+      "queries": 23
+    },
+    {
+      "condition": "Asthma",
+      "hit_rate_top10": 0.091,
+      "prevalence": 0.031,
+      "lift": 2.91,
+      "queries": 11
+    },
+    {
+      "condition": "Essential hypertension",
+      "hit_rate_top10": 0.586,
+      "prevalence": 0.22,
+      "lift": 2.66,
+      "queries": 64
+    },
+    {
+      "condition": "Recurrent rectal polyp",
+      "hit_rate_top10": 0.055,
+      "prevalence": 0.021,
+      "lift": 2.64,
+      "queries": 11
+    },
+    {
+      "condition": "Osteoarthritis of knee",
+      "hit_rate_top10": 0.1,
+      "prevalence": 0.042,
+      "lift": 2.39,
+      "queries": 6
+    },
+    {
+      "condition": "Anemia",
+      "hit_rate_top10": 0.851,
+      "prevalence": 0.357,
+      "lift": 2.38,
+      "queries": 112
+    },
+    {
+      "condition": "Localized  primary osteoarthritis of the hand",
+      "hit_rate_top10": 0.04,
+      "prevalence": 0.018,
+      "lift": 2.17,
+      "queries": 5
+    },
+    {
+      "condition": "Recurrent urinary tract infection",
+      "hit_rate_top10": 0.078,
+      "prevalence": 0.041,
+      "lift": 1.88,
+      "queries": 9
+    },
+    {
+      "condition": "Adolescent idiopathic scoliosis",
+      "hit_rate_top10": 0.033,
+      "prevalence": 0.021,
+      "lift": 1.61,
+      "queries": 6
+    },
+    {
+      "condition": "Contact dermatitis",
+      "hit_rate_top10": 0.011,
+      "prevalence": 0.02,
+      "lift": 0.55,
+      "queries": 9
+    },
+    {
+      "condition": "Osteoarthritis of hip",
+      "hit_rate_top10": 0.0,
+      "prevalence": 0.017,
+      "lift": 0.0,
+      "queries": 8
+    }
+  ]
+}

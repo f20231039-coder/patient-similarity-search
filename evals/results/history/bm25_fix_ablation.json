@@ -1,0 +1,194 @@
+{
+  "eval_queries": 200,
+  "tune_queries": 150,
+  "grid": [
+    {
+      "w_bm25": 0.25,
+      "k": 30,
+      "train_ndcg@10": 0.2876
+    },
+    {
+      "w_bm25": 0.25,
+      "k": 60,
+      "train_ndcg@10": 0.2967
+    },
+    {
+      "w_bm25": 0.25,
+      "k": 100,
+      "train_ndcg@10": 0.3035
+    },
+    {
+      "w_bm25": 0.5,
+      "k": 30,
+      "train_ndcg@10": 0.3002
+    },
+    {
+      "w_bm25": 0.5,
+      "k": 60,
+      "train_ndcg@10": 0.3069
+    },
+    {
+      "w_bm25": 0.5,
+      "k": 100,
+      "train_ndcg@10": 0.3066
+    },
+    {
+      "w_bm25": 0.75,
+      "k": 30,
+      "train_ndcg@10": 0.306
+    },
+    {
+      "w_bm25": 0.75,
+      "k": 60,
+      "train_ndcg@10": 0.3052
+    },
+    {
+      "w_bm25": 0.75,
+      "k": 100,
+      "train_ndcg@10": 0.3055
+    },
+    {
+      "w_bm25": 1.0,
+      "k": 30,
+      "train_ndcg@10": 0.3105
+    },
+    {
+      "w_bm25": 1.0,
+      "k": 60,
+      "train_ndcg@10": 0.3079
+    },
+    {
+      "w_bm25": 1.0,
+      "k": 100,
+      "train_ndcg@10": 0.3075
+    }
+  ],
+  "chosen": {
+    "BM25_TOKENS": "flags",
+    "RRF_K": 30,
+    "RRF_W_BM25": 1.0,
+    "RRF_W_VEC": 1.0
+  },
+  "ltr_training": {
+    "train_queries": 300,
+    "pairs": 15000,
+    "positive_rate": 0.6087
+  },
+  "baseline_ltr": {
+    "mode": "ltr",
+    "system": "Hybrid + learned ranker (structured features)",
+    "n_queries": 200,
+    "recall@10": 0.6415,
+    "mrr": 0.7676,
+    "ndcg@10": 0.3376,
+    "precision@10": 0.6415,
+    "latency_median_ms": 204.6
+  },
+  "rows": [
+    {
+      "mode": "bm25",
+      "system": "BM25, raw tokens (baseline)",
+      "n_queries": 200,
+      "recall@10": 0.479,
+      "mrr": 0.6012,
+      "ndcg@10": 0.188,
+      "precision@10": 0.479,
+      "latency_median_ms": 81.0,
+      "step": 0,
+      "bm25_tokens": "raw",
+      "rrf_k": 60,
+      "w_bm25": 1.0,
+      "w_vec": 1.0
+    },
+    {
+      "mode": "vector",
+      "system": "Vector search (unchanged by these fixes)",
+      "n_queries": 200,
+      "recall@10": 0.5775,
+      "mrr": 0.6775,
+      "ndcg@10": 0.2739,
+      "precision@10": 0.5775,
+      "latency_median_ms": 71.5,
+      "step": 0,
+      "bm25_tokens": "raw",
+      "rrf_k": 60,
+      "w_bm25": 1.0,
+      "w_vec": 1.0
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid RRF, raw BM25 (baseline)",
+      "n_queries": 200,
+      "recall@10": 0.5395,
+      "mrr": 0.6802,
+      "ndcg@10": 0.255,
+      "precision@10": 0.5395,
+      "latency_median_ms": 140.8,
+      "step": 0,
+      "bm25_tokens": "raw",
+      "rrf_k": 60,
+      "w_bm25": 1.0,
+      "w_vec": 1.0
+    },
+    {
+      "mode": "bm25",
+      "system": "BM25 on words + clinical flags",
+      "n_queries": 200,
+      "recall@10": 0.612,
+      "mrr": 0.7217,
+      "ndcg@10": 0.3263,
+      "precision@10": 0.612,
+      "latency_median_ms": 63.2,
+      "step": 1,
+      "bm25_tokens": "flags",
+      "rrf_k": 60,
+      "w_bm25": 1.0,
+      "w_vec": 1.0
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid RRF, flag BM25",
+      "n_queries": 200,
+      "recall@10": 0.5925,
+      "mrr": 0.6978,
+      "ndcg@10": 0.3067,
+      "precision@10": 0.5925,
+      "latency_median_ms": 164.3,
+      "step": 1,
+      "bm25_tokens": "flags",
+      "rrf_k": 60,
+      "w_bm25": 1.0,
+      "w_vec": 1.0
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid weighted RRF (w_bm25=1.0, k=30), flag BM25",
+      "n_queries": 200,
+      "recall@10": 0.5965,
+      "mrr": 0.695,
+      "ndcg@10": 0.3081,
+      "precision@10": 0.5965,
+      "latency_median_ms": 193.4,
+      "step": 2,
+      "bm25_tokens": "flags",
+      "rrf_k": 30,
+      "w_bm25": 1.0,
+      "w_vec": 1.0
+    },
+    {
+      "mode": "ltr",
+      "system": "Learned ranker, retrained on the new candidates",
+      "n_queries": 200,
+      "recall@10": 0.6975,
+      "mrr": 0.803,
+      "ndcg@10": 0.3845,
+      "precision@10": 0.6975,
+      "latency_median_ms": 242.2,
+      "step": 3,
+      "bm25_tokens": "flags",
+      "rrf_k": 30,
+      "w_bm25": 1.0,
+      "w_vec": 1.0
+    }
+  ]
+}

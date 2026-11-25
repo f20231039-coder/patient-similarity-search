@@ -1,0 +1,17 @@
+[
+  {"q": "ladies past retirement age who are heavy and whose sugars keep climbing", "expect": {"gender": "female", "age_min": 65, "labs": {"bmi": "high"}, "trends": {"glucose": "rising"}}},
+  {"q": "gents north of fifty with sky-high cholesterol", "expect": {"gender": "male", "age_min": 50, "labs": {"cholesterol": "high"}}},
+  {"q": "people on medicaid whose kidneys aren't filtering well", "expect": {"insurance": "medicaid", "labs": {"egfr": "low"}}},
+  {"q": "patients who used to smoke and now have pressure readings through the roof", "expect": {"smoking": "former", "labs": {"systolic": "high"}}},
+  {"q": "females aged 35 or younger who look anaemic on bloods", "expect": {"gender": "female", "age_max": 35, "labs": {"hemoglobin": "low"}}},
+  {"q": "men around retirement who are piling on the pounds", "expect": {"gender": "male", "age_min": 60, "age_max": 70, "trends": {"bmi": "rising"}}},
+  {"q": "folks without coverage whose a1c is out of control", "expect": {"insurance": "uninsured", "labs": {"hba1c": "high"}}},
+  {"q": "seniors on medicare with a lousy lipid profile, lots of LDL", "expect": {"insurance": "medicare", "age_min": 65, "labs": {"ldl": "high"}}},
+  {"q": "who has kidney numbers heading downhill?", "expect": {"trends": {"egfr": "falling"}}},
+  {"q": "thin young women, early twenties", "expect": {"gender": "female", "age_min": 20, "age_max": 24, "labs": {"bmi": "low"}}},
+  {"q": "non-smoking blokes in their forties with fats in the blood too high, triglycerides especially", "expect": {"gender": "male", "smoking": "never", "age_min": 40, "age_max": 49, "labs": {"triglycerides": "high"}}},
+  {"q": "patients whose blood pressure has been creeping up and whose sugar is borderline", "expect": {"trends": {"systolic": "rising"}, "labs": {"glucose": "borderline"}}},
+  {"q": "older women with brittle bones", "expect": {"gender": "female", "age_min": 65}},
+  {"q": "privately covered middle-aged men with a racing heart", "expect": {"insurance": "private", "gender": "male", "age_min": 40, "age_max": 65, "labs": {"heart_rate": "high"}}},
+  {"q": "anyone whose HbA1c has been coming down nicely", "expect": {"trends": {"hba1c": "falling"}}}
+]

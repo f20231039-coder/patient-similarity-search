@@ -1,0 +1,80 @@
+{
+  "rows": [
+    {
+      "mode": "vector",
+      "system": "Vector search (current embedder)",
+      "n_queries": 200,
+      "recall@10": 0.5775,
+      "mrr": 0.6775,
+      "ndcg@10": 0.2739,
+      "precision@10": 0.5775,
+      "latency_median_ms": 109.3,
+      "stage": "before",
+      "ndcg_ci95": [
+        0.2389,
+        0.3114
+      ]
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid RRF, flag BM25 (current)",
+      "n_queries": 200,
+      "recall@10": 0.5965,
+      "mrr": 0.695,
+      "ndcg@10": 0.3081,
+      "precision@10": 0.5965,
+      "latency_median_ms": 220.1,
+      "stage": "before",
+      "ndcg_ci95": [
+        0.2719,
+        0.3459
+      ]
+    },
+    {
+      "mode": "ltr",
+      "system": "Pointwise learned ranker (current)",
+      "n_queries": 200,
+      "recall@10": 0.6975,
+      "mrr": 0.803,
+      "ndcg@10": 0.3845,
+      "precision@10": 0.6975,
+      "latency_median_ms": 255.9,
+      "stage": "before",
+      "ndcg_ci95": [
+        0.3438,
+        0.4237
+      ]
+    },
+    {
+      "mode": "ltr",
+      "system": "LambdaRank learned ranker (current embedder)",
+      "n_queries": 200,
+      "recall@10": 0.699,
+      "mrr": 0.7994,
+      "ndcg@10": 0.4394,
+      "precision@10": 0.699,
+      "latency_median_ms": 237.7,
+      "stage": "ltr",
+      "ndcg_ci95": [
+        0.3971,
+        0.4826
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "diff": 0.054914000000000004,
+      "ci95": [
+        0.0342056875,
+        0.0771237675
+      ],
+      "p_value": 0.0,
+      "a": "Pointwise learned ranker (current)",
+      "b": "LambdaRank learned ranker (current embedder)"
+    }
+  ],
+  "notes": [
+    "200 evaluation queries; 1200 training queries; the evaluation patients are excluded from all training data (queries, candidates, positives, negatives).",
+    "current embedder: LambdaRank trained on 1200 training queries / 53360 pairs; CV-chosen params {'num_leaves': 31, 'learning_rate': 0.08, 'n_estimators': 700, 'min_child_samples': 60} (CV nDCG@10 0.653)."
+  ]
+}

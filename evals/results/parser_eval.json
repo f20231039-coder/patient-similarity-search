@@ -1,0 +1,164 @@
+{
+  "n_queries": 40,
+  "parsers": [
+    {
+      "parser": "rules",
+      "precision": 1.0,
+      "recall": 0.991,
+      "f1": 0.996,
+      "f1_answered_only": 0.996,
+      "exact_match": 0.975,
+      "errors": 0,
+      "latency_median_ms": 0.7,
+      "mistakes": [
+        {
+          "q": "patients with high anxiety and depression scores",
+          "missing": [
+            "('labs.phq2', 'high')"
+          ],
+          "extra": []
+        }
+      ]
+    },
+    {
+      "parser": "llm:gemini:gemini-3.5-flash-lite",
+      "precision": 0.982,
+      "recall": 1.0,
+      "f1": 0.991,
+      "f1_answered_only": 0.991,
+      "exact_match": 0.975,
+      "errors": 0,
+      "latency_median_ms": 765.7,
+      "mistakes": [
+        {
+          "q": "show me patients like a 45 year old obese man with high glucose",
+          "missing": [],
+          "extra": [
+            "('age_max', 49)",
+            "('age_min', 40)"
+          ]
+        }
+      ]
+    },
+    {
+      "parser": "llm:gemini:gemini-3.5-flash",
+      "precision": 0.949,
+      "recall": 0.33,
+      "f1": 0.49,
+      "f1_answered_only": 0.974,
+      "exact_match": 0.35,
+      "errors": 25,
+      "latency_median_ms": 50961.9,
+      "mistakes": [
+        {
+          "q": "women over 60 with high BMI and rising glucose",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "obese male smokers in their 50s",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "medicaid patients with low kidney function",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "men between 40 and 55 with high LDL",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "elderly diabetic women with high blood pressure",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "ex-smokers under 45 with normal cholesterol",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "uninsured patients with high HbA1c",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "patients with high bad cholesterol and rising blood pressure",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "anemic women",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "female non-smokers aged 30 to 45 with borderline glucose",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "medicare patients over 70 with falling kidney function",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "men with high triglycerides and low HDL",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "overweight women in their 40s",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "patients whose HbA1c is rising",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "smokers with high blood pressure",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "privately insured men over 50 with elevated glucose",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "women under 35 with low hemoglobin",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "patients with high creatinine and low eGFR",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "hypertensive men in their 60s with rising cholesterol",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "dual eligible patients with high blood sugar",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "older adults with normal blood pressure",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "women with rising BMI",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "male patients aged 20-30 who smoke",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "patients over 80",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "medicaid women with high LDL and high triglycerides",
+          "error": "gemini:gemini-3.5-flash returned HTTP 429"
+        },
+        {
+          "q": "show me patients like a 45 year old obese man with high glucose",
+          "missing": [],
+          "extra": [
+            "('age_max', 45)",
+            "('age_min', 45)"
+          ]
+        }
+      ]
+    }
+  ]
+}

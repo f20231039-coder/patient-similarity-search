@@ -1,0 +1,131 @@
+{
+  "rows": [
+    {
+      "mode": "vector",
+      "system": "Vector search (current embedder)",
+      "n_queries": 200,
+      "recall@10": 0.5775,
+      "mrr": 0.6775,
+      "ndcg@10": 0.2739,
+      "precision@10": 0.5775,
+      "latency_median_ms": 91.9,
+      "stage": "before",
+      "ndcg_ci95": [
+        0.2389,
+        0.3114
+      ]
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid RRF, flag BM25 (current)",
+      "n_queries": 200,
+      "recall@10": 0.5965,
+      "mrr": 0.695,
+      "ndcg@10": 0.3081,
+      "precision@10": 0.5965,
+      "latency_median_ms": 181.7,
+      "stage": "before",
+      "ndcg_ci95": [
+        0.2719,
+        0.3459
+      ]
+    },
+    {
+      "mode": "ltr",
+      "system": "Learned ranker (current default)",
+      "n_queries": 200,
+      "recall@10": 0.699,
+      "mrr": 0.7994,
+      "ndcg@10": 0.4394,
+      "precision@10": 0.699,
+      "latency_median_ms": 218.5,
+      "stage": "before",
+      "ndcg_ci95": [
+        0.3971,
+        0.4826
+      ]
+    },
+    {
+      "mode": "vector",
+      "system": "Vector search, fine-tuned embedder",
+      "n_queries": 200,
+      "recall@10": 0.5925,
+      "mrr": 0.6871,
+      "ndcg@10": 0.2739,
+      "precision@10": 0.5925,
+      "latency_median_ms": 87.2,
+      "stage": "embed",
+      "ndcg_ci95": [
+        0.2417,
+        0.3077
+      ]
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid RRF, fine-tuned embedder",
+      "n_queries": 200,
+      "recall@10": 0.6235,
+      "mrr": 0.7286,
+      "ndcg@10": 0.3442,
+      "precision@10": 0.6235,
+      "latency_median_ms": 183.9,
+      "stage": "embed",
+      "ndcg_ci95": [
+        0.3097,
+        0.3804
+      ]
+    },
+    {
+      "mode": "ltr",
+      "system": "LambdaRank learned ranker (fine-tuned embedder)",
+      "n_queries": 200,
+      "recall@10": 0.7135,
+      "mrr": 0.8081,
+      "ndcg@10": 0.458,
+      "precision@10": 0.7135,
+      "latency_median_ms": 221.7,
+      "stage": "ltr",
+      "ndcg_ci95": [
+        0.4139,
+        0.5016
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "diff": 2.2950000000001025e-05,
+      "ci95": [
+        -0.02046002625,
+        0.02138160875
+      ],
+      "p_value": 0.493,
+      "a": "Vector search (current embedder)",
+      "b": "Vector search, fine-tuned embedder"
+    },
+    {
+      "diff": 0.0360924,
+      "ci95": [
+        0.01879922624999999,
+        0.05382932999999998
+      ],
+      "p_value": 0.0,
+      "a": "Hybrid RRF, flag BM25 (current)",
+      "b": "Hybrid RRF, fine-tuned embedder"
+    },
+    {
+      "diff": 0.01854205,
+      "ci95": [
+        0.00316703,
+        0.03470041375
+      ],
+      "p_value": 0.009,
+      "a": "Learned ranker (current default)",
+      "b": "LambdaRank learned ranker (fine-tuned embedder)"
+    }
+  ],
+  "notes": [
+    "200 evaluation queries; 1200 training queries; the evaluation patients are excluded from all training data (queries, candidates, positives, negatives).",
+    "Embedder: all-MiniLM-L6-v2 fine-tuned 2 epochs (7,817 s on CPU) on 3,385 (anchor, positive, hard negative) triplets from training patients only; positives share the most conditions.",
+    "fine-tuned embedder: LambdaRank trained on 1200 training queries / 53140 pairs; CV-chosen params {'num_leaves': 31, 'learning_rate': 0.08, 'n_estimators': 700, 'min_child_samples': 60} (CV nDCG@10 0.650)."
+  ]
+}

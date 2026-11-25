@@ -1,0 +1,162 @@
+{
+  "answer_key": "relevant = shares >=1 chronic condition; nDCG gain = number shared",
+  "n_index_period1": 1803,
+  "n_index_period2": 2275,
+  "ltr_training": {
+    "train_queries": 300,
+    "pairs": 15000,
+    "positive_rate": 0.5475
+  },
+  "drift": {
+    "reindex_stats": {
+      "added": 472,
+      "updated": 1618,
+      "payload_only": 185,
+      "unchanged": 0,
+      "total_before": 1803,
+      "total_after": 2275,
+      "qdrant_points": 2275,
+      "seconds": 139.97,
+      "source": "documents_period2.jsonl"
+    },
+    "n_queries": 200,
+    "n_new_patient_queries": 11,
+    "before_reindex": [
+      {
+        "mode": "vector",
+        "system": "Vector search only",
+        "n_queries": 200,
+        "recall@10": 0.6045,
+        "mrr": 0.735,
+        "ndcg@10": 0.2865,
+        "precision@10": 0.6045,
+        "latency_median_ms": 95.2
+      },
+      {
+        "mode": "hybrid",
+        "system": "Hybrid (RRF)",
+        "n_queries": 200,
+        "recall@10": 0.6075,
+        "mrr": 0.7272,
+        "ndcg@10": 0.2878,
+        "precision@10": 0.6075,
+        "latency_median_ms": 161.4
+      },
+      {
+        "mode": "rerank",
+        "system": "Hybrid + cross-encoder re-rank",
+        "n_queries": 200,
+        "recall@10": 0.5775,
+        "mrr": 0.6599,
+        "ndcg@10": 0.2436,
+        "precision@10": 0.5775,
+        "latency_median_ms": 8172.1
+      },
+      {
+        "mode": "ltr",
+        "system": "Hybrid + learned ranker (structured features)",
+        "n_queries": 200,
+        "recall@10": 0.666,
+        "mrr": 0.7785,
+        "ndcg@10": 0.3365,
+        "precision@10": 0.6655,
+        "latency_median_ms": 180.5
+      }
+    ],
+    "after_reindex": [
+      {
+        "mode": "vector",
+        "system": "Vector search only",
+        "n_queries": 200,
+        "recall@10": 0.589,
+        "mrr": 0.669,
+        "ndcg@10": 0.2706,
+        "precision@10": 0.589,
+        "latency_median_ms": 86.4
+      },
+      {
+        "mode": "hybrid",
+        "system": "Hybrid (RRF)",
+        "n_queries": 200,
+        "recall@10": 0.567,
+        "mrr": 0.6942,
+        "ndcg@10": 0.2521,
+        "precision@10": 0.567,
+        "latency_median_ms": 196.1
+      },
+      {
+        "mode": "rerank",
+        "system": "Hybrid + cross-encoder re-rank",
+        "n_queries": 200,
+        "recall@10": 0.5505,
+        "mrr": 0.65,
+        "ndcg@10": 0.2389,
+        "precision@10": 0.5505,
+        "latency_median_ms": 6135.5
+      },
+      {
+        "mode": "ltr",
+        "system": "Hybrid + learned ranker (structured features)",
+        "n_queries": 200,
+        "recall@10": 0.6565,
+        "mrr": 0.7829,
+        "ndcg@10": 0.3453,
+        "precision@10": 0.6565,
+        "latency_median_ms": 203.0
+      }
+    ]
+  },
+  "main": [
+    {
+      "mode": "bm25",
+      "system": "BM25 only",
+      "n_queries": 200,
+      "recall@10": 0.479,
+      "mrr": 0.6012,
+      "ndcg@10": 0.188,
+      "precision@10": 0.479,
+      "latency_median_ms": 56.8
+    },
+    {
+      "mode": "vector",
+      "system": "Vector search only",
+      "n_queries": 200,
+      "recall@10": 0.5775,
+      "mrr": 0.6775,
+      "ndcg@10": 0.2739,
+      "precision@10": 0.5775,
+      "latency_median_ms": 82.9
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid (RRF)",
+      "n_queries": 200,
+      "recall@10": 0.5395,
+      "mrr": 0.6802,
+      "ndcg@10": 0.255,
+      "precision@10": 0.5395,
+      "latency_median_ms": 169.6
+    },
+    {
+      "mode": "rerank",
+      "system": "Hybrid + cross-encoder re-rank",
+      "n_queries": 200,
+      "recall@10": 0.519,
+      "mrr": 0.5899,
+      "ndcg@10": 0.212,
+      "precision@10": 0.519,
+      "latency_median_ms": 6012.7
+    },
+    {
+      "mode": "ltr",
+      "system": "Hybrid + learned ranker (structured features)",
+      "n_queries": 200,
+      "recall@10": 0.6415,
+      "mrr": 0.7676,
+      "ndcg@10": 0.3376,
+      "precision@10": 0.6415,
+      "latency_median_ms": 204.6
+    }
+  ],
+  "random_ranking_precision": 0.2811
+}

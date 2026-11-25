@@ -1,0 +1,64 @@
+{
+  "answer_key": "relevant = shares >=1 chronic condition; nDCG gain = number shared",
+  "n_index": 2275,
+  "embedder": "D:\\Machine Learning\\Assignments\\Assignment-6\\artifacts\\models\\embed-ft",
+  "rows": [
+    {
+      "mode": "bm25",
+      "system": "BM25 (words + clinical flags)",
+      "n_queries": 200,
+      "recall@10": 0.612,
+      "mrr": 0.7217,
+      "ndcg@10": 0.3263,
+      "precision@10": 0.612,
+      "latency_median_ms": 87.6,
+      "ndcg_ci95": [
+        0.2919,
+        0.3607
+      ]
+    },
+    {
+      "mode": "vector",
+      "system": "Vector search (fine-tuned embedder)",
+      "n_queries": 200,
+      "recall@10": 0.5925,
+      "mrr": 0.6871,
+      "ndcg@10": 0.2739,
+      "precision@10": 0.5925,
+      "latency_median_ms": 106.7,
+      "ndcg_ci95": [
+        0.2417,
+        0.3077
+      ]
+    },
+    {
+      "mode": "hybrid",
+      "system": "Hybrid (RRF)",
+      "n_queries": 200,
+      "recall@10": 0.6235,
+      "mrr": 0.7286,
+      "ndcg@10": 0.3442,
+      "precision@10": 0.6235,
+      "latency_median_ms": 221.3,
+      "ndcg_ci95": [
+        0.3097,
+        0.3804
+      ]
+    },
+    {
+      "mode": "ltr",
+      "system": "Hybrid + learned ranker (default)",
+      "n_queries": 200,
+      "recall@10": 0.7135,
+      "mrr": 0.8081,
+      "ndcg@10": 0.458,
+      "precision@10": 0.7135,
+      "latency_median_ms": 259.3,
+      "ndcg_ci95": [
+        0.4139,
+        0.5016
+      ]
+    }
+  ],
+  "random_ranking_precision": 0.2811
+}

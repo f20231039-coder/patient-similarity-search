@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest==9.2.0
+streamlit==1.67.0
+# only for evals/finetune.py (embedder fine-tuning)
+datasets==5.2.0
+accelerate==1.16.0

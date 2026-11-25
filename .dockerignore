@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+.env
+csv
+docs
+evals
+tests
+build
+artifacts/qdrant
+**/__pycache__
+.pytest_cache

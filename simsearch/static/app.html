@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patient Similarity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --bg: #F5EEE6; --surface: #FFFAF4; --ink: #3A2A22; --ink-2: #5E4637; --ink-3: #6E5647; --line: #EADBCD;
+    --accent: #7B5642; --accent-ink: #FFFFFF; --accent-soft: #F3E6D9; --accent-deep: #5F4132; --red: #A83A26; --red-soft: #FBEAE4;
+    --amber: #94560F; --amber-soft: #FBEFDC; --green: #4F6D35; --green-soft: #EEF3E6; --side: #3A2A22; --side-ink: #EADBCD;
+    --sans: "Manrope", "Segoe UI", system-ui, sans-serif; --r: 10px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+  ::selection { background: var(--accent); color: #fff; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button, input, select { font: inherit; color: inherit; }
+  button { line-height: 1.45; }
+  .num { font-variant-numeric: tabular-nums; }
+
+
+  [hidden] { display: none !important; }
+  .sr { position: absolute; left: -9999px; }
+  .nw { white-space: nowrap; }
+
+  /* top bar */
+  .appbar { position: sticky; top: 0; z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line);
+            display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; align-items: center;
+            padding: 12px max(28px, calc((100% - 1480px) / 2 + 28px)); transition: box-shadow .25s ease; }
+  .appbar.scrolled { box-shadow: 0 6px 18px rgba(58,42,34,.08); }
+  @media (max-width: 1000px) { .appbar { grid-template-columns: minmax(0, 1fr) auto; gap: 10px 14px; padding: 10px 16px; }
+                               .appbar .search { grid-column: 1 / -1; grid-row: 2; max-width: none; } }
+  .brand { display: flex; align-items: center; gap: 11px; background: none; border: 0; padding: 4px 6px 4px 0; cursor: pointer; text-align: left; border-radius: 10px; }
+  .brand .mark { width: 38px; height: 38px; border-radius: 11px; background: var(--accent-soft); display: grid; place-items: center; flex: none; }
+  .brand b { display: block; color: var(--ink); font-weight: 800; font-size: 17px; letter-spacing: -0.015em; line-height: 1.25; }
+  .brand small { display: block; font-weight: 500; font-size: 12.5px; color: var(--ink-3); line-height: 1.35; }
+  .brand:hover .mark { background: #E6CBB2; }
+  .search { display: flex; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
+            padding: 5px 5px 5px 16px; width: 100%; max-width: 620px; justify-self: center;
+            box-shadow: inset 0 1px 2px rgba(58,42,34,.05); transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; }
+  .search:hover { border-color: #D9C3AF; }
+  .search:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 4px rgba(123,86,66,.12); }
+  .search svg { flex: none; }
+  .search input { flex: 1; min-width: 0; border: 0; background: none; color: var(--ink); padding: 8px 2px; outline: none; font-size: 15px; }
+  .search input::placeholder { color: var(--ink-3); }
+  .search .btn { border-radius: 999px; padding: 8px 18px; }
+  .barbtns { display: flex; gap: 4px; }
+  .navbtn { display: inline-flex; align-items: center; gap: 7px; background: none; border: 1px solid transparent; border-radius: 999px;
+            padding: 8px 13px; font-weight: 700; font-size: 14px; color: var(--ink-2); cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+  .navbtn:hover { background: var(--accent-soft); color: var(--ink); }
+  .navbtn svg { flex: none; }
+  @media (max-width: 620px) { .navbtn span { position: absolute; left: -9999px; } .navbtn { padding: 9px; } .brand small { display: none; } }
+  /* step indicator */
+  .stepper { list-style: none; margin: 0 0 10px; padding: 0; display: flex; gap: 6px 18px; flex-wrap: wrap; font-size: 13px; color: var(--ink-3); font-weight: 600; }
+  .stepper li { display: flex; align-items: center; gap: 7px; }
+  .stepper .n { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #D9C3AF; display: grid; place-items: center; font-size: 11.5px; font-weight: 800; }
+  .stepper li.on { color: var(--ink); }
+  .stepper li.on .n { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+  .stepper li.done .n { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  /* start screen */
+  .hgrid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+  .h-demo { grid-column: span 7; } .h-desc { grid-column: span 5; } .h-cond { grid-column: span 7; } .h-recent { grid-column: span 5; }
+  @media (max-width: 1100px) { .h-demo, .h-desc, .h-cond, .h-recent { grid-column: 1 / -1; } }
+  .cases { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .case { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 14px; cursor: pointer; display: grid; gap: 3px; align-content: start; }
+  .case:hover { border-color: var(--accent); background: #FBF4EC; }
+  .case .t { font-weight: 800; }
+  .case .s { font-size: 13px; color: var(--ink-3); }
+  .case .c { font-size: 12.5px; color: var(--ink-2); }
+  .egs { display: grid; gap: 8px; }
+  .eg { text-align: left; border: 1px dashed #D9C3AF; background: transparent; border-radius: 10px; padding: 9px 12px; cursor: pointer; color: var(--ink); }
+  .eg:hover { border-style: solid; border-color: var(--accent); background: #FBF4EC; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button { background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 5px 11px; font-size: 13px; cursor: pointer; }
+  .chips button:hover, .chips button[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+  .chips button small { color: var(--ink-3); margin-left: 5px; }
+
+  /* search results */
+  .understood { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; margin-bottom: 16px; }
+  .understood .ulab { font-size: 12.5px; color: var(--ink-3); font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+  .understood .qchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .understood .qchip { display: inline-flex; align-items: center; gap: 5px; background: #E6CBB2; color: #3A2A22; border: 0; border-radius: 999px; padding: 3px 5px 3px 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .understood .qchip span { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(58,42,34,.12); font-weight: 800; }
+  .understood .qchip:hover span { background: #3A2A22; color: #E6CBB2; }
+  .understood .none { font-size: 13.5px; color: var(--ink-2); margin-top: 4px; }
+  .understood .sum { font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+  .plist { list-style: none; margin: 0; padding: 0; }
+  .plist > li + li { border-top: 1px solid var(--line); }
+  .plist button { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 14px; text-align: left; background: none; border: 0; padding: 10px 6px; cursor: pointer; border-radius: 8px; }
+  .plist button:hover, .plist button[aria-current="true"] { background: #FBF4EC; }
+  .plist .id { font-weight: 800; grid-column: 1; }
+  .plist .sub { font-size: 13px; color: var(--ink-3); grid-column: 1; }
+  .plist .partial { font-size: 12.5px; color: var(--amber); font-weight: 600; grid-column: 1; }
+  .plist .go { grid-column: 2; grid-row: 1 / span 3; align-self: center; color: var(--accent); font-weight: 700; font-size: 13px; }
+  .plist .empty { padding: 10px 6px; color: var(--ink-2); }
+  .disc { font-size: 12.5px; color: var(--ink-3); margin: 18px 0 0; }
+  .shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); max-width: 1480px; margin: 0 auto; }
+  main { padding: 24px 28px 60px; min-width: 0; }
+  @media (max-width: 1000px) { .shell { grid-template-columns: 1fr; } .sidenav { display: none; } }
+
+  /* sidebar */
+  .sidenav { position: sticky; top: 65px; align-self: start; height: calc(100vh - 65px); overflow-y: auto;
+             padding: 22px 14px 18px 28px; display: flex; flex-direction: column; gap: 22px;
+             border-right: 1px solid var(--line); scrollbar-width: thin; scrollbar-color: #D9C3AF transparent; }
+  .navgroup { display: grid; gap: 3px; }
+  .navitem { display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 10px; border-radius: 10px;
+             border: 1px solid transparent; background: none; color: var(--ink-2); font-weight: 700; font-size: 14px;
+             cursor: pointer; text-align: left; transition: background-color .15s ease, color .15s ease; }
+  .navitem svg { flex: none; color: var(--ink-3); }
+  .navitem small { display: block; font-weight: 600; color: var(--ink-3); font-size: 12px; line-height: 1.35; }
+  .navitem:hover:not([disabled]) { background: var(--accent-soft); color: var(--ink); }
+  .navitem[aria-current="page"] { background: var(--surface); border-color: var(--line); color: var(--ink); box-shadow: 0 1px 2px rgba(58,42,34,.06); }
+  .navitem[aria-current="page"] svg { color: var(--accent); }
+  .navitem[disabled] { opacity: .5; cursor: default; }
+  .sidehead { font-size: 12px; font-weight: 800; color: var(--ink-3); letter-spacing: .02em; margin: 0 10px 6px; }
+  .sidelist { display: grid; gap: 1px; }
+  .sidelist button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 6px 10px; border-radius: 8px;
+                     font-size: 13.5px; color: var(--ink-2); cursor: pointer; line-height: 1.4; }
+  .sidelist button small { display: block; font-size: 12px; color: var(--ink-3); }
+  .sidelist button:hover, .sidelist button[aria-current="true"] { background: var(--accent-soft); color: var(--ink); }
+  .sidenav .disc { margin: auto 10px 0; }
+  /* sidebar: at a glance + shortlist */
+  .ctx { display: grid; gap: 10px; margin: 0 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .ctx .row { display: grid; gap: 2px; font-size: 13px; color: var(--ink-2); }
+  .ctx .row > span { font-size: 11.5px; font-weight: 700; color: var(--ink-3); letter-spacing: .02em; }
+  .ctx .row b { color: var(--ink); font-weight: 700; }
+  .ctx .acts { display: grid; gap: 6px; }
+  .ctx .acts .btn { width: 100%; padding: 7px 10px; font-size: 13px; }
+  .lvl { display: inline-block; padding: 1px 9px; border-radius: 999px; font-weight: 800; font-size: 12.5px; }
+  .lvl.high { background: var(--red-soft); color: var(--red); } .lvl.moderate { background: var(--amber-soft); color: var(--amber); } .lvl.low { background: var(--green-soft); color: var(--green); }
+  .legend { display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; }
+  .legend i.a { background: var(--accent); } .legend i.b { background: #C98A2E; }
+  .legend i.band { width: 18px; height: 9px; border-radius: 3px; background: #DCE7CF; }
+  .short { display: grid; gap: 2px; }
+  .short label { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; align-items: start; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 13.5px; color: var(--ink-2); }
+  .short label:hover { background: var(--accent-soft); }
+  .short input { margin-top: 3px; accent-color: var(--accent); }
+  .short small { display: block; font-size: 12px; color: var(--ink-3); }
+  .short .open { background: none; border: 0; padding: 0; color: var(--ink); font-weight: 700; cursor: pointer; text-align: left; font-size: 13.5px; }
+  .short .open:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .short-acts { display: flex; gap: 6px; margin: 6px 10px 0; }
+  .short-acts .btn { padding: 6px 10px; font-size: 13px; }
+  .short-empty { font-size: 12.5px; color: var(--ink-3); margin: 0 10px; line-height: 1.5; }
+  .savebtn { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; font-size: 12.5px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+  .savebtn:hover, .savebtn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+
+  /* compare v2 */
+  .verdict { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; margin: 16px 0; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; }
+  @media (max-width: 860px) { .verdict { grid-template-columns: 1fr; gap: 12px; } }
+  .verdict .q { font-size: 13px; font-weight: 700; color: var(--ink-3); }
+  .verdict .word { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; margin-top: 2px; }
+  .verdict .meter { height: 8px; border-radius: 4px; background: #F1E6DA; margin-top: 10px; position: relative; overflow: hidden; }
+  .verdict .meter i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--accent); }
+  .verdict .mscale { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
+  .verdict ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .verdict li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; font-size: 15px; }
+  .verdict li > span { font-size: 12.5px; font-weight: 800; color: var(--ink-3); padding-top: 2px; }
+  @media (max-width: 560px) { .verdict li { grid-template-columns: 1fr; gap: 2px; } }
+  .cmp-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); }
+  .cmp-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .cmp-legend i.a { background: var(--accent); } .cmp-legend i.b { background: #C98A2E; } .cmp-legend i.band { width: 18px; height: 9px; border-radius: 3px; background: #DCE7CF; }
+  .area { margin-top: 14px; }
+  .area h3 { font-size: 13px; font-weight: 800; color: var(--ink-3); margin: 0 0 4px; letter-spacing: .02em; }
+  .trow { display: grid; grid-template-columns: minmax(150px, 1.1fr) minmax(160px, 2fr) 92px 92px 96px; gap: 14px; align-items: center; padding: 9px 8px; border-top: 1px solid var(--line); border-radius: 6px; }
+  .trow.diff { background: var(--amber-soft); }
+  .trow .nm { font-size: 14px; } .trow .nm small { display: block; font-size: 12px; color: var(--ink-3); }
+  .trow .val { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .trow .val small { display: block; font-size: 12px; font-weight: 700; }
+  .trow .val.a { color: var(--accent-deep); } .trow .val.b { color: #8A5A12; }
+  .trow .val small.bad { color: var(--red); } .trow .val small.warn { color: var(--amber); } .trow .val small.ok { color: var(--ink-3); font-weight: 600; }
+  .trow .st { font-size: 12.5px; font-weight: 800; }
+  .trow .st.same { color: var(--green); } .trow .st.diff { color: var(--amber); } .trow .st.na { color: var(--ink-3); font-weight: 600; }
+  @media (max-width: 860px) { .trow { grid-template-columns: 1fr 1fr; } .trow .nm, .trow .dp { grid-column: 1 / -1; } }
+  .dp { position: relative; height: 22px; }
+  .dp .track { position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: #E2D3C4; border-radius: 1px; }
+  .dp .band { position: absolute; top: 6px; height: 10px; background: #DCE7CF; border-radius: 3px; }
+  .dp .m { position: absolute; top: 4px; width: 14px; height: 14px; border-radius: 50%; transform: translateX(-7px); border: 2px solid var(--surface); box-shadow: 0 0 0 1px rgba(58,42,34,.15); }
+  .dp .m.a { background: var(--accent); } .dp .m.b { background: #C98A2E; }
+  .morebtn { margin-top: 12px; background: none; border: 0; color: var(--accent); font-weight: 800; cursor: pointer; padding: 0; }
+
+  @media (max-width: 640px) { main { padding: 16px; } }
+  .topbar { display: flex; justify-content: space-between; align-items: start; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+  .topbar h1 { margin: 0; font-size: 26px; line-height: 1.35; letter-spacing: -0.02em; }
+  .topbar p { margin: 4px 0 0; color: var(--ink-2); max-width: 64ch; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); border-radius: 8px; padding: 9px 14px; font-weight: 700; cursor: pointer; }
+  .btn:hover { background: var(--accent-deep); }
+  .btn.light { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .btn.light:hover { border-color: #D9C3AF; background: #FBF4EC; }
+
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; margin-bottom: 18px; }
+  .filters .ttl { font-weight: 700; margin-right: 6px; align-self: center; }
+  .filters label { display: grid; gap: 3px; font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
+  .filters input, .filters select { padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); min-width: 110px; }
+  .filters input[type=number] { width: 84px; min-width: 0; }
+
+  .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 1px 2px rgba(58,42,34,.05); min-width: 0; }
+  .panel .hd { padding: 14px 16px 0; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .panel h2 { margin: 0; font-size: 16px; letter-spacing: -0.01em; }
+  .panel .hd span { color: var(--ink-3); font-size: 13px; }
+  .panel .bd { padding: 10px 16px 16px; }
+  .panel .help { margin: 2px 0 10px; color: var(--ink-3); font-size: 13px; }
+  .c-patient { grid-column: span 7; } .c-risk { grid-column: span 5; } .c-sim { grid-column: span 8; } .c-cond { grid-column: span 4; }
+  @media (max-width: 1200px) { .c-patient, .c-risk, .c-sim, .c-cond { grid-column: 1 / -1; } }
+
+  .who { display: flex; gap: 14px; align-items: center; }
+  .avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--accent-soft); color: var(--accent-deep); display: grid; place-items: center; font-weight: 800; }
+  .who .id { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+  .who .ln { color: var(--ink-2); }
+  .facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .chip { font-size: 12.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #F5EEE6; color: var(--ink-2); }
+  .chip.bad { background: var(--red-soft); color: var(--red); }
+  .chip.warn { background: var(--amber-soft); color: var(--amber); }
+  .chip.dead { background: var(--ink); color: var(--surface); }
+  .deadtag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 0 7px; border-radius: 999px; background: var(--ink); color: var(--surface); margin-left: 6px; vertical-align: 1px; }
+
+  /* side-by-side compare */
+  .cmp-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .cmp-bar h2 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
+  .cmp-bar p { margin: 2px 0 0; color: var(--ink-3); font-size: 13.5px; }
+  .cmp-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .cmp-cols { grid-template-columns: 1fr; } }
+  .cmp-person { border-top: 4px solid var(--accent); }
+  .cmp-person.b { border-top-color: var(--amber); }
+  .cmp-person .slot { font-size: 12.5px; font-weight: 800; color: var(--accent); letter-spacing: .02em; }
+  .cmp-person.b .slot { color: var(--amber); }
+  .cmp-pick { display: flex; gap: 6px; margin-top: 10px; }
+  .cmp-pick input { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  .cmp-results { list-style: none; margin: 6px 0 0; padding: 0; max-height: 220px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  .cmp-results:empty { display: none; }
+  .cmp-results button { width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none; padding: 7px 10px; cursor: pointer; }
+  .cmp-results button:hover { background: var(--accent-soft); }
+  .cmp-results small { color: var(--ink-3); }
+  .pickrecent { background: var(--accent-soft) !important; color: var(--ink) !important; border-color: var(--line) !important; }
+  .glance { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; margin: 16px 0; font-size: 15.5px; }
+  .glance b { font-weight: 800; }
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .cmp-table th { text-align: left; font-size: 12.5px; color: var(--ink-3); font-weight: 700; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  .cmp-table td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .cmp-table td.v { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cmp-table td.v small { font-weight: 600; color: var(--ink-3); }
+  .cmp-table .fl { display: block; font-size: 12px; font-weight: 700; }
+  .cmp-table .fl.bad { color: var(--red); } .cmp-table .fl.warn { color: var(--amber); } .cmp-table .fl.ok { color: var(--ink-3); font-weight: 600; }
+  .cmp-table tr.diff td { background: var(--amber-soft); }
+  .cmp-table .st { font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .cmp-table .st.same { color: var(--green); } .cmp-table .st.diff { color: var(--amber); } .cmp-table .st.na { color: var(--ink-3); font-weight: 600; }
+  .cmp-tools label { font-size: 13.5px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; cursor: pointer; }
+  .cond3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 760px) { .cond3 { grid-template-columns: 1fr; } }
+  .cond3 h3 { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
+  .cond3 ul { margin: 0; padding-left: 18px; font-size: 14px; }
+  .cond3 .none { color: var(--ink-3); font-size: 14px; margin: 0; }
+  .riskpair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+  @media (max-width: 760px) { .riskpair { grid-template-columns: 1fr; } }
+  .riskpair .who2 { font-weight: 800; font-size: 13px; color: var(--accent); }
+  .riskpair .b .who2 { color: var(--amber); }
+  .riskpair ul { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; }
+  .cmp-scroll { overflow-x: auto; }
+  .labs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .lab { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .lab .k { font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
+  .lab .v { font-size: 18px; font-weight: 800; }
+  .lab .v small { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+  .lab .f { font-size: 12px; font-weight: 700; }
+  .lab.bad { border-color: #EFC3B6; background: var(--red-soft); } .lab.bad .f { color: var(--red); }
+  .lab.warn { border-color: #EBCB9A; background: var(--amber-soft); } .lab.warn .f { color: var(--amber); }
+  .lab .r { font-size: 12px; color: var(--ink-3); }
+  .toggle { margin-top: 10px; background: none; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 0; }
+
+  .riskhead { display: flex; align-items: baseline; gap: 10px; }
+  .riskhead .lvl { font-size: 30px; font-weight: 800; text-transform: capitalize; letter-spacing: -0.02em; }
+  .riskhead .pct { font-size: 15px; color: var(--ink-2); font-weight: 600; }
+  .rbar { position: relative; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #E3EBD6 0 33%, #F6E5CC 33% 66%, #F5DBD3 66%); margin: 12px 0 4px; }
+  .rbar .mk { position: absolute; top: -5px; width: 4px; height: 22px; border-radius: 2px; background: var(--ink); transform: translateX(-2px); transition: left .9s cubic-bezier(.16,1,.3,1); }
+  .rscale { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); }
+  .rlist { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
+  .rlist li { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+  .rlist .bar { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: #F5EEE6; position: relative; }
+  .rlist .bar i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 3px; }
+  .rlist .tag { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .tag.up { background: var(--red-soft); color: var(--red); } .tag.down { background: var(--green-soft); color: var(--green); }
+
+  .simlist { list-style: none; margin: 0; padding: 0; }
+  .simlist > li { border-top: 1px solid var(--line); }
+  .simlist > li:first-child { border-top: 0; }
+  .simrow { width: 100%; display: grid; grid-template-columns: 34px minmax(0, 1.2fr) minmax(0, 1.6fr) 26px; gap: 12px; align-items: center; padding: 10px 4px; background: none; border: 0; text-align: left; cursor: pointer; }
+  .simrow:hover { background: #FBF4EC; }
+  .simrow .rk { width: 28px; height: 28px; border-radius: 8px; background: #F5EEE6; display: grid; place-items: center; font-weight: 800; font-size: 13px; color: var(--ink-2); }
+  .simrow .id { font-weight: 800; }
+  .simrow .sub { font-size: 13px; color: var(--ink-3); }
+  .simrow .cc { font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .simrow .sw { font-size: 12px; font-weight: 700; color: var(--green); }
+  .simrow svg { transition: transform .2s ease; }
+  .simrow[aria-expanded="true"] svg { transform: rotate(180deg); }
+  @media (max-width: 640px) { .simrow { grid-template-columns: 30px 1fr 22px; } .simrow .cc { grid-column: 2; white-space: normal; } }
+  .simdetail { padding: 0 8px 14px 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 14px; }
+  @media (max-width: 640px) { .simdetail { grid-template-columns: 1fr; padding-left: 8px; } }
+  .simdetail h3 { font-size: 13px; margin: 0 0 4px; color: var(--ink-2); }
+  .simdetail ul { margin: 0; padding-left: 18px; }
+  .simdetail .open { margin-top: 8px; }
+
+  .cbar { display: grid; gap: 10px; }
+  .cbar .c { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 14px; }
+  .cbar .t { grid-column: 1 / -1; height: 8px; background: #F5EEE6; border-radius: 4px; position: relative; overflow: hidden; }
+  .cbar .t i { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 4px; }
+  .cbar .n { color: var(--ink-3); font-weight: 600; }
+
+  .empty-state { background: var(--surface); border: 1px dashed #D9C3AF; border-radius: var(--r); padding: 28px; display: grid; gap: 14px; }
+  .empty-state h2 { margin: 0; font-size: 20px; }
+  .empty-state ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--ink-2); max-width: 70ch; }
+  .loading { padding: 24px; color: var(--ink-2); }
+  .error { padding: 12px 14px; border-radius: var(--r); background: var(--red-soft); color: var(--red); border: 1px solid #EFC3B6; }
+  details.how { margin-top: 18px; }
+  details.how summary { cursor: pointer; font-weight: 800; padding: 14px 16px; }
+  details.how ol { margin: 0; padding: 0 16px 16px 36px; display: grid; gap: 8px; max-width: 80ch; color: var(--ink-2); }
+  details.how b { color: var(--ink); display: block; }
+  .reveal { animation: up .45s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes up { from { opacity: .001; transform: translateY(8px); } }
+
+  @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } .rbar .mk, .simrow svg { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="appbar" id="appbar">
+  <button class="brand" id="brandbtn" type="button" title="Back to the start">
+    <span class="mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6" fill="none" stroke="#7B5642" stroke-width="2"/><circle cx="15" cy="12" r="6" fill="#7B5642" fill-opacity=".28" stroke="#7B5642" stroke-width="2"/></svg></span>
+    <span><b>Patient Similarity</b><small>Find look-alike patients, risk and reasons</small></span>
+  </button>
+  <form class="search" id="findform" role="search">
+    <label for="pid" class="sr">Find patients</label>
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" style="color:var(--ink-3)"><circle cx="7.5" cy="7.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.8 11.8L16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <input id="pid" placeholder="Describe patients, e.g. women over 60 with high BMI, or paste an ID" autocomplete="off">
+    <button type="submit" class="btn">Search</button>
+  </form>
+  <div class="barbtns">
+    <button class="navbtn" type="button" id="cmpbtn" title="Compare two patients">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="3" width="5.5" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="10.5" y="3" width="5.5" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Compare</span></button>
+    <button class="navbtn" type="button" id="resetbtn" title="Start over">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3.5 9a5.5 5.5 0 1 0 1.7-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 2.8v3.4h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Start over</span></button>
+  </div>
+</header>
+
+<div class="shell">
+<aside class="sidenav" aria-label="Navigation">
+  <nav class="navgroup">
+    <button class="navitem" type="button" id="nav-home" aria-current="page">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 8L9 2.8 15.5 8v6.7a.8.8 0 0 1-.8.8H11v-4.5H7v4.5H3.3a.8.8 0 0 1-.8-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Start</span></button>
+    <button class="navitem" type="button" id="nav-results" disabled>
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 4.5h9.5M6 9h9.5M6 13.5h9.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="2.8" cy="4.5" r=".9" fill="currentColor"/><circle cx="2.8" cy="9" r=".9" fill="currentColor"/><circle cx="2.8" cy="13.5" r=".9" fill="currentColor"/></svg>
+      <span>Search results<small id="nav-results-sub">No search yet</small></span></button>
+    <button class="navitem" type="button" id="nav-overview" disabled>
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="6" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15.5c.7-3 3.1-4.6 6-4.6s5.3 1.6 6 4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Patient overview<small id="nav-overview-sub">No patient open</small></span></button>
+    <button class="navitem" type="button" id="nav-compare">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="3" width="5.5" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="10.5" y="3" width="5.5" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Compare two patients</span></button>
+    <button class="navitem" type="button" id="nav-how">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 8.2v4.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="5.6" r=".9" fill="currentColor"/></svg>
+      <span>How it works</span></button>
+  </nav>
+  <div id="ctx-box" hidden><div class="sidehead" id="ctx-head">At a glance</div><div class="ctx" id="ctx"></div></div>
+  <div><div class="sidehead">Shortlist</div><div id="short"></div></div>
+  <div id="side-recent-box" hidden><div class="sidehead">Recently viewed</div><div class="sidelist" id="side-recent"></div></div>
+  <p class="disc">Synthetic training data only. No real patients. Not medical advice.</p>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div>
+      <ol class="stepper" id="steps" aria-label="Progress">
+        <li class="on" data-s="1"><span class="n">1</span>Choose a patient</li>
+        <li data-s="2"><span class="n">2</span>Read the overview</li>
+        <li data-s="3"><span class="n">3</span>Compare side by side</li>
+      </ol>
+      <h1 id="title">Find similar patients</h1>
+      <p id="subtitle">Pick a demo case, describe who you're looking for, or browse by condition. You never need to remember a patient ID.</p>
+    </div>
+    <div class="actions">
+      <button class="btn light" type="button" id="backres" hidden>Back to results</button>
+      <button class="btn light" type="button" id="howbtn">How it works</button>
+    </div>
+  </div>
+
+  <section id="home" aria-label="Start">
+    <div class="hgrid">
+      <section class="panel h-demo"><div class="hd"><h2>Start from a demo case</h2><span>real patients from the data</span></div>
+        <div class="bd"><div class="cases" id="demo"><p class="help">Loading…</p></div></div></section>
+      <section class="panel h-desc"><div class="hd"><h2>Or describe who you're looking for</h2></div>
+        <div class="bd"><p class="help">Type in plain English in the search bar above, or try one of these:</p>
+          <div class="egs">
+            <button type="button" class="eg">women over 60 with high BMI and rising glucose</button>
+            <button type="button" class="eg">obese male smokers in their 50s</button>
+            <button type="button" class="eg">medicaid patients with low kidney function</button>
+            <button type="button" class="eg">gents north of fifty with sky-high cholesterol</button>
+          </div></div></section>
+      <section class="panel h-cond"><div class="hd"><h2>Or browse by condition</h2><span>number of patients</span></div>
+        <div class="bd"><div class="chips" id="chips"></div></div></section>
+      <section class="panel h-recent" id="recentbox" hidden><div class="hd"><h2>Recently viewed</h2></div>
+        <div class="bd"><div class="chips" id="recent"></div></div></section>
+    </div>
+  </section>
+
+  <section id="resultsView" hidden aria-live="polite">
+    <div class="understood" id="understood" hidden></div>
+    <section class="panel"><div class="hd"><h2 id="listlabel">Results</h2><span id="listcount"></span></div>
+      <div class="bd"><ul class="plist" id="examples"></ul></div></section>
+  </section>
+
+  <div id="contentWrap" hidden>
+    <form class="filters" id="filters">
+      <span class="ttl">Compare with</span>
+      <label>Age from<input type="number" name="age_min" min="0" max="110"></label>
+      <label>Age to<input type="number" name="age_max" min="0" max="110"></label>
+      <label>Sex<select name="gender"><option value="">Any</option><option value="female">Female</option><option value="male">Male</option></select></label>
+      <label>Insurance<select name="insurance"><option value="">Any</option><option value="medicare">Medicare</option><option value="medicaid">Medicaid</option><option value="private">Private</option><option value="uninsured">No insurance</option><option value="dual">Medicare + Medicaid</option></select></label>
+      <button class="btn light" type="submit">Apply</button>
+    </form>
+    <div id="content" aria-live="polite"></div>
+  </div>
+
+  <details class="panel how" id="how">
+    <summary>How it works</summary>
+    <ol id="howlist"></ol>
+  </details>
+  <p class="disc">Synthetic training data only. No real patients. Not medical advice.</p>
+</main>
+</div>
+
+
+<script src="/static/common.js"></script>
+<script>
+(function () {
+  const S = window.SIM, $ = (id) => document.getElementById(id);
+  let current = null, lastReport = null, cmpA = null, cmpB = null;
+  const chev = `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="#6E5647" stroke-width="1.8"/></svg>`;
+
+  $("howlist").innerHTML = S.HOW_IT_WORKS.map((s) => `<li><b>${S.esc(s.title)}</b>${S.esc(s.text)}</li>`).join("");
+  $("howbtn").addEventListener("click", () => { $("how").open = true; $("how").scrollIntoView({ behavior: "smooth" }); });
+
+  function step(n) { document.querySelectorAll("#steps li").forEach((li) => { const s = Number(li.dataset.s); li.classList.toggle("on", s === n); li.classList.toggle("done", s < n); }); }
+
+  /* ---- views: start screen, search results, overview / compare ---- */
+  let lastList = null;  // {label, items} of the most recent result list, for "Back to results"
+  const TITLES = { home: ["Find similar patients", "Pick a demo case, describe who you're looking for, or browse by condition. You never need to remember a patient ID."],
+                   results: ["Search results", "Click a patient to open their overview."] };
+  let mode = "home";  // home | results | overview | compare (for the sidebar highlight)
+  function setNav() {
+    const cur = { home: "nav-home", results: "nav-results", overview: "nav-overview", compare: "nav-compare" }[mode];
+    ["nav-home", "nav-results", "nav-overview", "nav-compare"].forEach((id) => {
+      if (id === cur) $(id).setAttribute("aria-current", "page"); else $(id).removeAttribute("aria-current");
+    });
+    $("nav-results").disabled = !lastList;
+    $("nav-results-sub").textContent = lastList ? `${lastList.list.length} patient${lastList.list.length === 1 ? "" : "s"}` : "No search yet";
+    $("nav-overview").disabled = !lastReport;
+    $("nav-overview-sub").textContent = lastReport ? lastReport.patient.short_id : "No patient open";
+    document.querySelectorAll("#side-recent button").forEach((b) => b.setAttribute("aria-current", String(mode === "overview" && b.dataset.id === current)));
+    renderContext();
+  }
+  function showView(v) {
+    if (v !== "content") mode = v;
+    $("home").hidden = v !== "home";
+    $("resultsView").hidden = v !== "results";
+    $("contentWrap").hidden = v !== "content";
+    $("backres").hidden = !(v === "content" && lastList);
+    if (TITLES[v]) { $("title").textContent = TITLES[v][0]; $("subtitle").textContent = TITLES[v][1]; }
+    if (v !== "content") step(1);
+    setNav();
+  }
+
+  function showList(label, list) {
+    lastList = { label, list };
+    showView("results");
+    $("listlabel").textContent = label;
+    $("listcount").textContent = list.length ? `${list.length} shown` : "";
+    if (!list.length) { $("examples").innerHTML = `<li class="empty">No patients found. Try fewer words, remove a filter, or browse by condition.</li>`; return; }
+    $("examples").innerHTML = list.map((p) => `<li><button type="button" data-id="${S.esc(p.short_id)}" aria-current="${String(p.short_id === current)}">
+      <span class="id">${S.esc(S.capital(S.personLine(p)))}${p.deceased ? '<span class="deadtag">Deceased</span>' : ""}</span>
+      <span class="sub"><span class="nw">${S.esc(p.short_id)}</span>${p.chronic_conditions.length ? " · " + S.esc(p.chronic_conditions.slice(0, 3).join(", ")) : " · no long-term conditions recorded"}</span>
+      ${p.missing && p.missing.length ? `<span class="partial">Close match, but not: ${S.esc(p.missing.join(", "))}</span>` : ""}
+      <span class="go">Open</span></button></li>`).join("");
+    $("examples").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => load(b.dataset.id)));
+  }
+
+  function goHome() {
+    $("understood").hidden = true;
+    document.querySelectorAll("#chips button").forEach((c) => c.setAttribute("aria-pressed", "false"));
+    showView("home");
+  }
+
+  function startOver() {
+    current = null; lastReport = null; lastList = null; lastQuery = { q: "", parsed: null };
+    cmpA = null; cmpB = null;
+    $("pid").value = "";
+    $("filters").reset();
+    $("content").innerHTML = "";
+    $("examples").innerHTML = "";
+    goHome();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    $("pid").focus();
+  }
+  $("resetbtn").addEventListener("click", startOver);
+  window.addEventListener("scroll", () => $("appbar").classList.toggle("scrolled", window.scrollY > 4), { passive: true });
+  $("brandbtn").addEventListener("click", startOver);
+  $("nav-home").addEventListener("click", goHome);
+  $("nav-results").addEventListener("click", () => { if (lastList) { showList(lastList.label, lastList.list); window.scrollTo({ top: 0, behavior: "smooth" }); } });
+  $("nav-overview").addEventListener("click", () => { if (lastReport) { showView("content"); render(lastReport); step(2); window.scrollTo({ top: 0, behavior: "smooth" }); } });
+  $("nav-compare").addEventListener("click", () => openCompare(current, null));
+  $("nav-how").addEventListener("click", () => { $("how").open = true; $("how").scrollIntoView({ behavior: "smooth" }); });
+  $("backres").addEventListener("click", () => { if (lastList) showList(lastList.label, lastList.list); if (!$("understood").innerHTML) $("understood").hidden = true; });
+
+  S.api("/patients/showcase").then((list) => {
+    $("demo").innerHTML = list.map((p) => `<button type="button" class="case" data-id="${S.esc(p.short_id)}">
+      <span class="t">${S.esc(p.title)}</span><span class="s">${S.esc(S.capital(S.personLine(p)))} · <span class="nw">${S.esc(p.short_id)}</span></span>
+      <span class="c">${p.chronic_conditions.length ? S.esc(p.chronic_conditions.slice(0, 3).join(", ")) : "No long-term conditions recorded"}</span></button>`).join("");
+    $("demo").querySelectorAll(".case").forEach((b) => b.addEventListener("click", () => { lastList = null; load(b.dataset.id); }));
+  }).catch((e) => { $("demo").innerHTML = `<p class="help">${S.esc(e.message)}</p>`; });
+
+  /* plain-language search: the text is turned into filters (shown as chips), then searched */
+  let lastQuery = { q: "", parsed: null }, lastSearch = null;
+  async function findBy(q, parsed) {
+    q = (q || "").trim();
+    if (!q && !parsed) return;
+    if (!parsed && /^P-?[0-9A-F]{8}$/i.test(q.replace(/\s+/g, ""))) { $("understood").hidden = true; lastList = null; load(q.replace(/\s+/g, "")); return; }
+    showView("results");
+    $("listlabel").textContent = "Searching…";
+    $("listcount").textContent = "";
+    $("examples").innerHTML = `<li class="empty">Understanding your search and finding patients…</li>`;
+    try {
+      const r = await S.api("/query", { q, parsed: parsed || null, k: 15, strict: true });
+      lastQuery = { q, parsed: r.parsed };
+      lastSearch = r;
+      drawUnderstood(r);
+      const label = r.chips.length ? "Patients matching your search" : `Patients matching "${q}"`;
+      showList(label, r.results);
+    } catch (e) { $("examples").innerHTML = `<li class="sub">${S.esc(e.message)}</li>`; }
+  }
+
+  function drawUnderstood(r) {
+    const box = $("understood");
+    box.hidden = false;
+    const src = /^llm/.test(r.parser) ? "understood by AI" : r.parser === "edited by user" ? "edited" : "understood by keyword rules";
+    const chips = r.chips.length
+      ? `<div class="qchips">${r.chips.map((c) => `<button type="button" class="qchip" data-field="${S.esc(c.field)}" title="Remove this filter">${S.esc(c.label)}<span aria-hidden="true">×</span></button>`).join("")}</div>`
+      : `<div class="none">No specific filters found, so this is a general search on your words.</div>`;
+    const n = r.n_full_matches;
+    const sum = r.chips.length ? `<div class="sum">${n >= r.results.length ? `${n} patient${n === 1 ? "" : "s"} meet every filter.` : n ? `Only ${n} meet every filter; closest matches follow.` : "Nobody meets every filter; showing the closest matches."}</div>` : "";
+    box.innerHTML = `<div class="ulab"><span>Searching for</span><span>${S.esc(src)}</span></div>${chips}${sum}`;
+    box.querySelectorAll(".qchip").forEach((b) => b.addEventListener("click", () => removeFilter(b.dataset.field)));
+  }
+
+  function removeFilter(field) {
+    const p = JSON.parse(JSON.stringify(lastQuery.parsed || {}));
+    if (field === "age") { p.age_min = null; p.age_max = null; }
+    else if (field.startsWith("labs.")) delete p.labs[field.slice(5)];
+    else if (field.startsWith("trends.")) delete p.trends[field.slice(7)];
+    else p[field] = null;
+    findBy(lastQuery.q, p);
+  }
+  $("findform").addEventListener("submit", (e) => { e.preventDefault(); findBy($("pid").value); });
+  document.querySelectorAll(".eg").forEach((b) => b.addEventListener("click", () => { $("pid").value = b.textContent; findBy(b.textContent); }));
+
+  S.api("/patients/conditions?limit=10").then((list) => {
+    $("chips").innerHTML = list.map((c) => `<button type="button" data-c="${S.esc(c.name)}" aria-pressed="false">${S.esc(c.name)}<small>${c.patients}</small></button>`).join("");
+    $("chips").querySelectorAll("button").forEach((b) => b.addEventListener("click", async () => {
+      $("chips").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      $("understood").hidden = true;
+      showView("results");
+      $("examples").innerHTML = `<li class="empty">Loading…</li>`;
+      lastSearch = { condition: b.dataset.c };
+      try { showList(`Patients with ${b.dataset.c}`, await S.api(`/patients/browse?condition=${encodeURIComponent(b.dataset.c)}&limit=15`)); }
+      catch (e) { $("examples").innerHTML = `<li class="sub">${S.esc(e.message)}</li>`; }
+    }));
+  }).catch(() => {});
+
+  function readRecent() { try { return JSON.parse(localStorage.getItem("sim-recent") || "[]"); } catch (e) { return []; } }
+  function remember(p) {
+    const list = [{ id: p.short_id, label: S.capital(S.personLine(p)) }, ...readRecent().filter((x) => x.id !== p.short_id)].slice(0, 6);
+    try { localStorage.setItem("sim-recent", JSON.stringify(list)); } catch (e) { /* storage unavailable */ }
+    drawRecent();
+  }
+  function drawRecent() {
+    const list = readRecent();
+    $("recentbox").hidden = !list.length;
+    $("recent").innerHTML = list.map((x) => `<button type="button" data-id="${S.esc(x.id)}" title="${S.esc(x.id)}">${S.esc(x.label)}</button>`).join("");
+    $("recent").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { lastList = null; load(b.dataset.id); }));
+    $("side-recent-box").hidden = !list.length;
+    $("side-recent").innerHTML = list.map((x) => `<button type="button" data-id="${S.esc(x.id)}">${S.esc(x.label)}<small>${S.esc(x.id)}</small></button>`).join("");
+    $("side-recent").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { lastList = null; load(b.dataset.id); window.scrollTo({ top: 0, behavior: "smooth" }); }));
+  }
+  drawRecent();
+  showView("home");
+  $("filters").addEventListener("submit", (e) => { e.preventDefault(); if (current) load(current); else $("pid").focus(); });
+
+  async function load(id) {
+    current = id;
+    showView("content");
+    document.querySelectorAll("#examples button").forEach((b) => b.setAttribute("aria-current", String(b.dataset.id === id)));
+    $("content").innerHTML = `<div class="panel loading">Finding the patients most like ${S.esc(id)}…</div>`;
+    try {
+      const r = await S.report(id, S.filtersFrom($("filters")));
+      current = r.patient.short_id; lastReport = r; render(r); step(2); remember(r.patient);
+    } catch (e) { $("content").innerHTML = `<div class="error" role="alert">${S.esc(e.message)}</div>`; }
+  }
+
+  function render(r) {
+    mode = "overview";
+    const p = r.patient, labs = S.labRows(p.structured), off = labs.filter((x) => x.flag);
+    const risk = S.riskWords(r.risk), reasons = S.reasonWords(r.explanation), share = S.conditionShare(r);
+    $("filters").hidden = false;
+    $("title").textContent = `Overview · ${p.short_id}`;
+    setNav();
+    $("subtitle").textContent = `${S.capital(S.personLine(p))}. Compared with ${Object.keys(r.filters).length ? "the filtered group" : "all " + r.index_size + " patients"}.`;
+    const maxW = Math.max(0.0001, ...reasons.map((x) => x.weight));
+    const shown = off.length ? off : labs.slice(0, 6);
+    $("content").innerHTML = `<div class="grid">
+      <section class="panel c-patient reveal" aria-labelledby="hp">
+        <div class="hd"><h2 id="hp">Patient</h2><span>records up to ${S.esc(p.updated_at)} <button type="button" class="savebtn" id="savebtn" aria-pressed="${String(inShort(p.short_id))}">${inShort(p.short_id) ? "Saved" : "Save to shortlist"}</button></span></div>
+        <div class="bd">
+          <div class="who"><div class="avatar" aria-hidden="true">${p.gender === "female" ? "F" : "M"}${p.age != null ? Math.round(p.age) : ""}</div>
+            <div><div class="id">${S.esc(p.short_id)}</div><div class="ln">${S.esc(S.personLine(p))} · ${p.structured.n_encounters} visits in ${p.structured.years_of_history} years</div></div></div>
+          <div class="facts">${p.deceased ? '<span class="chip dead">Deceased (record ends at death)</span>' : ""}${p.structured.smoking ? `<span class="chip">${S.esc(p.structured.smoking.replace(/\s*\(finding\)/, ""))}</span>` : ""}
+            ${off.length ? `<span class="chip bad">${off.length} result${off.length > 1 ? "s" : ""} out of range</span>` : `<span class="chip">All results in range</span>`}
+            ${p.chronic_conditions.slice(0, 4).map((c) => `<span class="chip warn">${S.esc(c)}</span>`).join("")}</div>
+          <p class="help">${off.length ? "Results outside the normal range:" : "Latest results (all in range):"}</p>
+          <div class="labs" id="labgrid">${shown.map(labTile).join("")}</div>
+          ${labs.length > shown.length ? `<button class="toggle" type="button" id="alllabs">Show all ${labs.length} results</button>` : ""}
+        </div>
+      </section>
+
+      <section class="panel c-risk reveal" aria-labelledby="hr">
+        <div class="hd"><h2 id="hr">Estimated risk</h2><span>${risk ? S.esc(risk.model) + " model" : ""}</span></div>
+        <div class="bd">${risk ? `
+          <p class="help">Chance of diabetes, high blood pressure, prediabetes or metabolic syndrome.</p>
+          <div class="riskhead"><span class="lvl">${S.esc(risk.level)}</span><span class="pct">${risk.pct}%</span></div>
+          <div class="rbar" aria-hidden="true"><span class="mk" id="mk" style="left:0%"></span></div>
+          <div class="rscale"><span>Low</span><span>Moderate</span><span>High</span></div>
+          <ul class="rlist">${reasons.map((x) => `<li><span>${x.feature === "sex" ? S.esc(x.text.replace(/ (raises|lowers) the risk$/, "")) : `${S.esc(S.capital(x.feature))} <b class="num">${x.value}</b> <span style="color:var(--ink-3)">typical ${x.typical}</span>`}</span><span class="tag ${x.raises ? "up" : "down"}">${x.raises ? "raises" : "lowers"}</span>
+            <span class="bar"><i style="width:${Math.round((x.weight / maxW) * 100)}%;background:${x.raises ? "#C9644E" : "#7E9A5E"}"></i></span></li>`).join("")}</ul>
+          <p class="help" style="margin-top:12px">A pattern in synthetic data, not a diagnosis.</p>` : `<p class="help">Risk model unavailable.</p>`}</div>
+      </section>
+
+      <section class="panel c-sim reveal" aria-labelledby="hs">
+        <div class="hd"><h2 id="hs">Most similar patients</h2><span>${r.matches.length} found</span></div>
+        <div class="bd"><p class="help">Ordered by similarity. Open a row to see why they match and where they differ.</p>
+          ${r.matches.length ? `<ul class="simlist">${r.matches.map((m, i) => { const w = S.whySimilar(p, m); return `<li>
+            <button class="simrow" type="button" aria-expanded="false" aria-controls="sd${i}">
+              <span class="rk">${m.rank}</span>
+              <span><span class="id">${S.esc(m.short_id)}</span><span class="sub"> · ${S.esc(S.personLine(m))}</span>${m.deceased ? '<span class="deadtag">Deceased</span>' : ""}<br><span class="sw">${S.matchWords(w, m.rank)}</span></span>
+              <span class="cc">${m.chronic_conditions.length ? S.esc(m.chronic_conditions.join(", ")) : "No long-term conditions recorded"}</span>${chev}</button>
+            <div class="simdetail" id="sd${i}" hidden>
+              <div><h3>Why similar</h3><ul>${w.same.map((x) => `<li>${S.esc(x.text)}</li>`).join("") || "<li>Overall record pattern</li>"}</ul></div>
+              <div><h3>Differences</h3><ul>${w.diff.map((x) => `<li>${S.esc(x.text)}</li>`).join("") || "<li>No major differences in key results</li>"}</ul>
+                <button class="btn light open" type="button" data-cmp="${S.esc(m.short_id)}">Compare side by side</button>
+                <button class="btn light open" type="button" data-go="${S.esc(m.short_id)}">Open ${S.esc(m.short_id)}</button></div>
+            </div></li>`; }).join("")}</ul>` : `<p class="help">No patients match these filters. Widen the age range or remove a filter.</p>`}
+        </div>
+      </section>
+
+      <section class="panel c-cond reveal" aria-labelledby="hc">
+        <div class="hd"><h2 id="hc">Common conditions</h2><span>among matches</span></div>
+        <div class="bd"><p class="help">How many of the similar patients have each long-term condition on record.</p>
+          ${share.length ? `<div class="cbar">${share.slice(0, 8).map((c) => `<div class="c"><span>${S.esc(c.name)}</span><span class="n">${c.count}/${c.of}</span><span class="t"><i style="width:${c.pct}%"></i></span></div>`).join("")}</div>` : `<p class="help">No long-term conditions recorded among the matches.</p>`}
+        </div>
+      </section>
+    </div>`;
+
+    requestAnimationFrame(() => { const mk = $("mk"); if (mk && risk) mk.style.left = risk.pct + "%"; });
+    $("savebtn").addEventListener("click", () => toggleShort(p));
+    const all = $("alllabs");
+    if (all) all.addEventListener("click", () => { $("labgrid").innerHTML = labs.map(labTile).join(""); all.remove(); });
+    document.querySelectorAll(".simrow").forEach((b) => b.addEventListener("click", () => {
+      const open = b.getAttribute("aria-expanded") === "true"; b.setAttribute("aria-expanded", String(!open)); $(b.getAttribute("aria-controls")).hidden = open;
+    }));
+    document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => { load(b.dataset.go); window.scrollTo({ top: 0, behavior: "smooth" }); }));
+    document.querySelectorAll("[data-cmp]").forEach((b) => b.addEventListener("click", () => openCompare(p.short_id, b.dataset.cmp)));
+  }
+
+  /* ---------- side-by-side comparison ---------- */
+  cmpA = null; cmpB = null; let onlyDiff = true;
+  $("cmpbtn").addEventListener("click", () => openCompare(current, null));
+  const deadTag = (p) => (p && p.deceased ? '<span class="deadtag">Deceased</span>' : "");
+
+  async function openCompare(a, b) {
+    cmpA = a || null; cmpB = b || null;
+    showView("content");
+    mode = "compare";
+    setNav();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    $("filters").hidden = true;
+    step(3);
+    $("backres").hidden = true;
+    $("title").textContent = "Compare two patients";
+    $("subtitle").textContent = "Pick any two patients. Their results, long-term conditions and risk are shown next to each other, with differences highlighted.";
+    if (!cmpA || !cmpB) { drawCompareShell(null); return; }
+    $("content").innerHTML = `<div class="panel loading">Comparing ${S.esc(cmpA)} and ${S.esc(cmpB)}…</div>`;
+    try { drawCompareShell(await S.api(`/compare?a=${encodeURIComponent(cmpA)}&b=${encodeURIComponent(cmpB)}`)); }
+    catch (e) { drawCompareShell(null, e.message); }
+  }
+
+  function personCard(slot, p, id) {
+    const label = slot === "a" ? "Patient A" : "Patient B";
+    const head = p
+      ? `<div class="who" style="margin-top:6px"><div class="avatar" aria-hidden="true">${p.gender === "female" ? "F" : "M"}${p.age != null ? Math.round(p.age) : ""}</div>
+         <div><div class="id">${S.esc(p.short_id)}${deadTag(p)}</div><div class="ln">${S.esc(S.personLine(p))} · ${p.structured.n_encounters} visits in ${p.structured.years_of_history} years</div></div></div>`
+      : `<p class="help" style="margin:6px 0 0">${id ? S.esc(id) : "No patient chosen yet."}</p>`;
+    return `<section class="panel cmp-person ${slot}"><div class="bd" style="padding-top:14px">
+      <div class="slot">${label}</div>${head}
+      <form class="cmp-pick" data-slot="${slot}"><label for="cp${slot}" style="position:absolute;left:-9999px">Choose ${label}</label>
+        <input id="cp${slot}" placeholder="${p ? "Change: describe a patient or paste an ID" : "Describe a patient or paste an ID"}" autocomplete="off"><button class="btn light" type="submit">Find</button></form>
+      <ul class="cmp-results" id="cr${slot}"></ul>
+      ${recentPicks(slot)}
+    </div></section>`;
+  }
+
+  function recentPicks(slot) {
+    const other = slot === "a" ? cmpB : cmpA;
+    const seen = new Set();
+    const r = [...readShort(), ...readRecent()].filter((x) => x.id !== other && !seen.has(x.id) && seen.add(x.id)).slice(0, 4);
+    if (!r.length) return "";
+    return `<p class="help" style="margin:10px 0 4px">Or pick from your shortlist and recent patients:</p><div class="chips">${r.map((x) => `<button type="button" class="pickrecent" data-slot="${slot}" data-id="${S.esc(x.id)}">${S.esc(x.label)}</button>`).join("")}</div>`;
+  }
+
+  function flagClass(f) { return !f ? "ok" : (f === "borderline" || f === "overweight") ? "warn" : "bad"; }
+
+  function drawCompareShell(c, error) {
+    const back = lastReport ? `<button class="btn light" type="button" id="cmpback">Back to overview of ${S.esc(lastReport.patient.short_id)}</button>` : "";
+    let body;
+    if (error) body = `<div class="error" role="alert" style="margin-top:16px">${S.esc(error)}</div>`;
+    else if (!c) body = `<div class="empty-state" style="margin-top:16px"><h2>Choose both patients</h2><ol>
+        <li>Use the boxes above: describe a patient ("man 50s high cholesterol") or paste an ID.</li>
+        <li>Or click a recently viewed patient under each box.</li>
+        <li>From an overview, open a similar patient and press "Compare side by side".</li></ol></div>`;
+    else body = compareBody(c);
+    $("content").innerHTML = `<div class="cmp-bar"><div><h2>Side-by-side comparison</h2><p>How alike two patients are, what they share, and where they differ.</p></div>${back}</div>
+      <div class="cmp-cols">${personCard("a", c && c.a, cmpA)}${personCard("b", c && c.b, cmpB)}</div>${body}`;
+    if ($("cmpback")) $("cmpback").addEventListener("click", () => { render(lastReport); step(2); });
+    document.querySelectorAll(".cmp-pick").forEach((f) => f.addEventListener("submit", (e) => { e.preventDefault(); pickSearch(f.dataset.slot, f.querySelector("input").value); }));
+    document.querySelectorAll(".pickrecent").forEach((b) => b.addEventListener("click", () => choose(b.dataset.slot, b.dataset.id)));
+    const more = $("morebtn");
+    if (more) more.addEventListener("click", () => { onlyDiff = !onlyDiff; drawCompareShell(c); });
+  }
+
+  async function pickSearch(slot, q) {
+    q = (q || "").trim();
+    if (!q) return;
+    if (/^P-?[0-9A-F]{8}$/i.test(q.replace(/\s+/g, ""))) { choose(slot, q.replace(/\s+/g, "")); return; }
+    const ul = $("cr" + slot);
+    ul.innerHTML = `<li style="padding:7px 10px" class="help">Searching…</li>`;
+    try {
+      const list = await S.api(`/patients/browse?q=${encodeURIComponent(q)}&limit=8`);
+      ul.innerHTML = list.length
+        ? list.map((p) => `<li><button type="button" data-id="${S.esc(p.short_id)}">${S.esc(S.capital(S.personLine(p)))}${deadTag(p)}<br><small>${S.esc(p.short_id)}${p.chronic_conditions.length ? " · " + S.esc(p.chronic_conditions.slice(0, 2).join(", ")) : ""}</small></button></li>`).join("")
+        : `<li style="padding:7px 10px" class="help">No patients found. Try other words.</li>`;
+      ul.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => choose(slot, b.dataset.id)));
+    } catch (e) { ul.innerHTML = `<li style="padding:7px 10px" class="help">${S.esc(e.message)}</li>`; }
+  }
+
+  function choose(slot, id) {
+    if (slot === "a") cmpA = id; else cmpB = id;
+    openCompare(cmpA, cmpB);
+  }
+
+  /* ---------- compare: plain-language verdict, results by body area with dot plots ---------- */
+  function flagWord(f) { return f ? ({ obese: "obese", overweight: "overweight", underweight: "underweight" }[f] || f) : "normal"; }
+
+  function dotPlot(k, x, y) {
+    const n = S.NORMAL[k] || [0, 1];
+    const vals = [n[0], n[1], x && x.value, y && y.value].filter((v) => v != null);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const pad = (hi - lo) * 0.12 || 1;
+    lo -= pad; hi += pad;
+    const pos = (v) => ((v - lo) / (hi - lo)) * 100;
+    return `<div class="dp" aria-hidden="true"><span class="track"></span>
+      <span class="band" style="left:${pos(n[0]).toFixed(1)}%;width:${(pos(n[1]) - pos(n[0])).toFixed(1)}%"></span>
+      ${x ? `<span class="m a" style="left:${pos(x.value).toFixed(1)}%" title="A: ${S.fmt(x.value)}"></span>` : ""}
+      ${y ? `<span class="m b" style="left:${pos(y.value).toFixed(1)}%" title="B: ${S.fmt(y.value)}"></span>` : ""}</div>`;
+  }
+
+  function compareBody(c) {
+    const a = c.a, b = c.b, la = a.structured.latest || {}, lb = b.structured.latest || {};
+    const A = a.short_id, B = b.short_id;
+    const tests = S.LAB_ORDER.filter((k) => la[k] || lb[k]).map((k) => {
+      const x = la[k], y = lb[k];
+      const ab = (v) => v && v.flag && v.flag !== "borderline";
+      let status = "na";
+      if (x && y) status = (x.flag || null) === (y.flag || null) ? "same" : "diff";
+      return { k, x, y, status, weight: (ab(x) ? 1 : 0) + (ab(y) ? 1 : 0) };
+    });
+    const diffs = tests.filter((t) => t.status === "diff").sort((p, q) => q.weight - p.weight);
+    const sameN = tests.filter((t) => t.status === "same").length;
+    const union = c.shared_conditions.length + c.only_a.length + c.only_b.length;
+    const jac = union ? c.shared_conditions.length / union : 1;
+    const resSim = sameN + diffs.length ? sameN / (sameN + diffs.length) : 0.5;
+    const score = 0.5 * jac + 0.5 * resSim;
+    const word = score >= 0.65 ? "Very alike" : score >= 0.45 ? "Somewhat alike" : "Quite different";
+    const listTxt = (arr) => arr.length <= 2 ? arr.join(" and ") : `${arr.slice(0, 2).join(", ")} and ${arr.length - 2} more`;
+
+    const shared = c.shared_conditions.length
+      ? `Both have <b>${S.esc(listTxt(c.shared_conditions))}</b>.` + (c.only_a.length || c.only_b.length
+        ? ` ${c.only_a.length ? `Only A has ${S.esc(listTxt(c.only_a))}.` : ""} ${c.only_b.length ? `Only B has ${S.esc(listTxt(c.only_b))}.` : ""}` : "")
+      : `They have <b>no long-term conditions in common</b>.`;
+    const diffTxt = diffs.length ? diffs.slice(0, 3).map((t) => {
+      const L = S.LABS[t.k], fa = flagWord(t.x.flag), fb = flagWord(t.y.flag);
+      if (fa === "normal") return `${S.esc(L.plain)} is <b>${S.esc(fb)}</b> in B (${S.fmt(t.y.value)}) but normal in A (${S.fmt(t.x.value)})`;
+      if (fb === "normal") return `${S.esc(L.plain)} is <b>${S.esc(fa)}</b> in A (${S.fmt(t.x.value)}) but normal in B (${S.fmt(t.y.value)})`;
+      return `${S.esc(L.plain)} is <b>${S.esc(fa)}</b> in A (${S.fmt(t.x.value)}) and <b>${S.esc(fb)}</b> in B (${S.fmt(t.y.value)})`;
+    }).join("; ") + "." : "Their measured results have the same status (normal or out of range) across the board.";
+    const ra = S.riskWords(a.risk), rb = S.riskWords(b.risk);
+    let riskTxt = "Risk estimate unavailable.";
+    if (ra && rb) {
+      if (ra.level === rb.level) riskTxt = `Both have <b>${S.esc(ra.level)}</b> estimated risk (A ${ra.pct}%, B ${rb.pct}%).`;
+      else {
+        const [hi, lo, hn, ln] = ra.pct >= rb.pct ? [ra, rb, "A", "B"] : [rb, ra, "B", "A"];
+        riskTxt = `<b>${hn}</b> has higher estimated risk (${S.esc(hi.level)}, ${hi.pct}%) than ${ln} (${S.esc(lo.level)}, ${lo.pct}%).`;
+      }
+    }
+
+    const shown = onlyDiff && diffs.length ? new Set(diffs.map((t) => t.k)) : null;
+    const areas = S.AREAS.map(([name, keys]) => {
+      const rows = tests.filter((t) => keys.includes(t.k) && (!shown || shown.has(t.k)));
+      if (!rows.length) return "";
+      return `<div class="area"><h3>${S.esc(name)}</h3>${rows.map((t) => {
+        const L = S.LABS[t.k];
+        const val = (v, cls) => v
+          ? `<div class="val ${cls}">${S.fmt(v.value)}${L.unit ? ` <span style="font-weight:600;font-size:12px">${S.esc(L.unit)}</span>` : ""}<small class="${flagClass(v.flag)}">${S.esc(S.capital(flagWord(v.flag)))}</small></div>`
+          : `<div class="val ${cls}"><small class="ok">not measured</small></div>`;
+        const st = t.status === "same" ? `<span class="st same">Same status</span>` : t.status === "diff" ? `<span class="st diff">Different</span>` : `<span class="st na">Only one measured</span>`;
+        return `<div class="trow ${t.status === "diff" ? "diff" : ""}"><div class="nm">${S.esc(L.plain)}<small>normal ${S.esc(L.range)}</small></div>${dotPlot(t.k, t.x, t.y)}${val(t.x, "a")}${val(t.y, "b")}${st}</div>`;
+      }).join("")}</div>`;
+    }).join("");
+    const toggle = diffs.length && diffs.length < tests.length
+      ? `<button type="button" class="morebtn" id="morebtn">${onlyDiff ? `Show all ${tests.length} results` : `Show only the ${diffs.length} differences`}</button>` : "";
+    const list = (arr, none) => (arr.length ? `<ul>${arr.map((x) => `<li>${S.esc(x)}</li>`).join("")}</ul>` : `<p class="none">${none}</p>`);
+
+    return `<div class="verdict">
+        <div><div class="q">How alike are they?</div><div class="word">${word}</div>
+          <div class="meter" aria-hidden="true"><i style="width:${Math.round(score * 100)}%"></i></div><div class="mscale"><span>Different</span><span>Alike</span></div></div>
+        <ul><li><span>Shared</span><div>${shared}</div></li><li><span>Biggest differences</span><div>${diffTxt}</div></li><li><span>Risk</span><div>${riskTxt}</div></li></ul>
+      </div>
+      <div class="grid">
+        <section class="panel" style="grid-column:1/-1"><div class="hd"><h2>${onlyDiff && diffs.length ? `Where they differ (${diffs.length} of ${tests.length} results)` : `All results (${tests.length})`}</h2></div>
+          <div class="bd"><div class="cmp-legend"><span><i class="a"></i>A · ${S.esc(A)}</span><span><i class="b"></i>B · ${S.esc(B)}</span><span><i class="band"></i>Normal range</span></div>
+          ${areas}${toggle}</div></section>
+        <section class="panel" style="grid-column:1/-1"><div class="hd"><h2>Long-term conditions</h2></div>
+          <div class="bd cond3"><div><h3>Both have</h3>${list(c.shared_conditions, "None in common")}</div><div><h3>Only A (${S.esc(A)})</h3>${list(c.only_a, "None")}</div><div><h3>Only B (${S.esc(B)})</h3>${list(c.only_b, "None")}</div></div></section>
+      </div>`;
+  }
+
+  /* ---------- sidebar: context panel ("at a glance") ---------- */
+  function renderContext() {
+    const box = $("ctx-box"), el = $("ctx");
+    let html = "", head = "At a glance";
+    if (mode === "overview" && lastReport) {
+      const r = lastReport, p = r.patient, risk = S.riskWords(r.risk);
+      const off = S.labRows(p.structured).filter((x) => x.flag && x.flag !== "borderline");
+      const top = S.conditionShare(r)[0];
+      const closest = r.matches[0];
+      head = `At a glance · ${p.short_id}`;
+      html = `<div class="row"><span>Estimated risk</span><div>${risk ? `<b class="lvl ${S.esc(risk.level)}">${S.esc(S.capital(risk.level))} · ${risk.pct}%</b>` : "Unavailable"}</div></div>
+        <div class="row"><span>Out of range</span><div>${off.length ? S.esc(off.slice(0, 3).map((x) => `${x.name} ${x.flagWord}`).join(", ")) + (off.length > 3 ? ` +${off.length - 3} more` : "") : "All results in range"}</div></div>
+        <div class="row"><span>Look-alikes most often have</span><div>${top ? `<b>${S.esc(top.name)}</b> (${top.count} of ${top.of})` : "No long-term conditions"}</div></div>
+        <div class="acts">${closest ? `<button type="button" class="btn" id="ctx-cmp">Compare with closest match</button>` : ""}
+          <button type="button" class="btn light" id="ctx-save">${inShort(p.short_id) ? "Remove from shortlist" : "Save to shortlist"}</button></div>`;
+    } else if (mode === "compare") {
+      head = "Reading the comparison";
+      html = `<div class="legend"><span><i class="a"></i>Patient A${cmpA ? ` · ${S.esc(cmpA)}` : ""}</span><span><i class="b"></i>Patient B${cmpB ? ` · ${S.esc(cmpB)}` : ""}</span><span><i class="band"></i>Normal range</span></div>
+        <div class="row"><div>Each dot is a result. Dots inside the green band are normal; amber rows are where the two patients differ.</div></div>
+        <div class="acts">${cmpA && cmpB ? `<button type="button" class="btn light" id="ctx-swap">Swap A and B</button>` : ""}</div>`;
+    } else if (mode === "results" && lastSearch) {
+      head = "Your search";
+      if (lastSearch.condition) {
+        html = `<div class="row"><span>Showing</span><div>Patients with <b>${S.esc(lastSearch.condition)}</b></div></div>`;
+      } else {
+        const chips = (lastSearch.chips || []).map((c) => c.label);
+        html = `<div class="row"><span>Filters</span><div>${chips.length ? S.esc(chips.join(" · ")) : "None found; general search on your words"}</div></div>
+          ${chips.length ? `<div class="row"><span>Meet every filter</span><div><b>${lastSearch.n_full_matches}</b> patient${lastSearch.n_full_matches === 1 ? "" : "s"}</div></div>` : ""}
+          <div class="row"><div>Remove a filter chip above the results to widen the search.</div></div>`;
+      }
+    }
+    box.hidden = !html;
+    $("ctx-head").textContent = head;
+    el.innerHTML = html;
+    const cmp = $("ctx-cmp"), save = $("ctx-save"), swap = $("ctx-swap");
+    if (cmp) cmp.addEventListener("click", () => openCompare(current, lastReport.matches[0].short_id));
+    if (save) save.addEventListener("click", () => toggleShort(lastReport.patient));
+    if (swap) swap.addEventListener("click", () => openCompare(cmpB, cmpA));
+  }
+
+  /* ---------- sidebar: shortlist (saved patients, compare any two) ---------- */
+  function readShort() { try { return JSON.parse(localStorage.getItem("sim-short") || "[]"); } catch (e) { return []; } }
+  function writeShort(list) { try { localStorage.setItem("sim-short", JSON.stringify(list)); } catch (e) { /* storage unavailable */ } }
+  function inShort(id) { return readShort().some((x) => x.id === id); }
+  function toggleShort(p) {
+    const list = readShort();
+    writeShort(inShort(p.short_id) ? list.filter((x) => x.id !== p.short_id) : [{ id: p.short_id, label: S.capital(S.personLine(p)) }, ...list].slice(0, 12));
+    renderShort();
+    renderContext();
+    const b = $("savebtn");
+    if (b && lastReport && lastReport.patient.short_id === p.short_id) { const on = inShort(p.short_id); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "Saved" : "Save to shortlist"; }
+  }
+  function renderShort() {
+    const list = readShort();
+    if (!list.length) { $("short").innerHTML = `<p class="short-empty">Save patients from their overview ("Save to shortlist"), then tick any two to compare them.</p>`; return; }
+    $("short").innerHTML = `<div class="short">${list.map((x) => `<label><input type="checkbox" value="${S.esc(x.id)}"><span><button type="button" class="open" data-id="${S.esc(x.id)}">${S.esc(x.label)}</button><small>${S.esc(x.id)}</small></span></label>`).join("")}</div>
+      <div class="short-acts"><button type="button" class="btn" id="short-cmp" disabled>Compare selected</button><button type="button" class="btn light" id="short-clear">Clear</button></div>`;
+    const boxes = [...$("short").querySelectorAll("input")];
+    const sync = () => { const n = boxes.filter((x) => x.checked).length; $("short-cmp").disabled = n !== 2; $("short-cmp").textContent = n === 2 ? "Compare selected" : `Tick 2 to compare (${n})`; };
+    boxes.forEach((x) => x.addEventListener("change", sync));
+    sync();
+    $("short").querySelectorAll(".open").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); lastList = null; load(b.dataset.id); window.scrollTo({ top: 0, behavior: "smooth" }); }));
+    $("short-cmp").addEventListener("click", () => { const ids = boxes.filter((x) => x.checked).map((x) => x.value); if (ids.length === 2) openCompare(ids[0], ids[1]); });
+    $("short-clear").addEventListener("click", () => { writeShort([]); renderShort(); renderContext(); });
+  }
+  renderShort();
+
+  function labTile(x) {
+    const cls = x.flag ? (x.flag === "borderline" || x.flag === "overweight" ? "warn" : "bad") : "";
+    return `<div class="lab ${cls}"><div class="k">${S.esc(x.name)}</div><div class="v num">${S.fmt(x.value)}${x.unit ? ` <small>${S.esc(x.unit)}</small>` : ""}</div>
+      <div class="f">${x.flagWord ? S.esc(S.capital(x.flagWord)) : ""}${x.trend && x.trend !== "stable" ? ` · ${S.esc(x.trend)}` : ""}</div><div class="r">Normal: ${S.esc(x.range)}</div></div>`;
+  }
+
+})();
+</script>
+</body>
+</html>
